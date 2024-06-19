@@ -21,6 +21,10 @@ struct GoblinProof {
 
     size_t size() const
     {
+        info("merge_proof.size() = ", merge_proof.size());
+        info("eccvm_proof.size() = ", eccvm_proof.size());
+        info("translator_proof.size() = ", translator_proof.size());
+        info("TranslationEvaluations::size() = ", TranslationEvaluations::size());
         return merge_proof.size() + eccvm_proof.size() + translator_proof.size() + TranslationEvaluations::size();
     };
 

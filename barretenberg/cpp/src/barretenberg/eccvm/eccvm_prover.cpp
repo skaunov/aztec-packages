@@ -193,6 +193,9 @@ HonkProof ECCVMProver::construct_proof()
 {
     BB_OP_COUNT_TIME_NAME("ECCVMProver::construct_proof");
 
+    info("eccvm proving key     size : ", key->circuit_size);
+    info("eccvm proving key log size : ", key->log_circuit_size);
+
     execute_preamble_round();
 
     execute_wire_commitments_round();

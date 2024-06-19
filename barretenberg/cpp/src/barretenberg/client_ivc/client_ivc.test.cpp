@@ -39,7 +39,7 @@ class ClientIVCTests : public ::testing::Test {
     static bool prove_and_verify(ClientIVC& ivc)
     {
         auto proof = ivc.prove();
-
+        info("client ivc proof size: ", proof.size());
         auto verifier_inst = std::make_shared<VerifierInstance>(ivc.instance_vk);
         return ivc.verify(proof, { ivc.verifier_accumulator, verifier_inst });
     }

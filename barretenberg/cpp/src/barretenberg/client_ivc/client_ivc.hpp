@@ -47,6 +47,13 @@ class ClientIVC {
         GoblinProof goblin_proof;
 
         MSGPACK_FIELDS(folding_proof, decider_proof, goblin_proof);
+        size_t size() const
+        {
+            info("folding_proof.size() = ", folding_proof.size());
+            info("decider_proof.size() = ", decider_proof.size());
+            goblin_proof.size();
+            return folding_proof.size() + decider_proof.size() + goblin_proof.size();
+        }
     };
 
   private:
