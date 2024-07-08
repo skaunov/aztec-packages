@@ -302,6 +302,13 @@
     [[maybe_unused]] auto sha256_sel_sha256_compression = View(new_term.sha256_sel_sha256_compression);                \
     [[maybe_unused]] auto sha256_state = View(new_term.sha256_state);                                                  \
     [[maybe_unused]] auto perm_main_alu = View(new_term.perm_main_alu);                                                \
+    [[maybe_unused]] auto perm_main_alu_add = View(new_term.perm_main_alu_add);                                        \
+    [[maybe_unused]] auto perm_main_alu_sub = View(new_term.perm_main_alu_sub);                                        \
+    [[maybe_unused]] auto perm_main_alu_mul = View(new_term.perm_main_alu_mul);                                        \
+    [[maybe_unused]] auto perm_main_alu_cast = View(new_term.perm_main_alu_cast);                                      \
+    [[maybe_unused]] auto perm_main_alu_lt = View(new_term.perm_main_alu_lt);                                          \
+    [[maybe_unused]] auto perm_main_alu_lte = View(new_term.perm_main_alu_lte);                                        \
+    [[maybe_unused]] auto perm_main_alu_eq = View(new_term.perm_main_alu_eq);                                          \
     [[maybe_unused]] auto perm_main_bin = View(new_term.perm_main_bin);                                                \
     [[maybe_unused]] auto perm_main_conv = View(new_term.perm_main_conv);                                              \
     [[maybe_unused]] auto perm_main_pos2_perm = View(new_term.perm_main_pos2_perm);                                    \

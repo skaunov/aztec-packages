@@ -300,6 +300,13 @@ template <typename FF> struct AvmFullRow {
     FF sha256_sel_sha256_compression{};
     FF sha256_state{};
     FF perm_main_alu{};
+    FF perm_main_alu_add{};
+    FF perm_main_alu_sub{};
+    FF perm_main_alu_mul{};
+    FF perm_main_alu_cast{};
+    FF perm_main_alu_lt{};
+    FF perm_main_alu_lte{};
+    FF perm_main_alu_eq{};
     FF perm_main_bin{};
     FF perm_main_conv{};
     FF perm_main_pos2_perm{};

@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,8 @@ void Stats::reset()
 
 void Stats::increment(const std::string& key, uint64_t value)
 {
+    static std::mutex mutex;
+    std::lock_guard lock(mutex);
     stats[key] += value;
 }
 
@@ -28,7 +31,7 @@ void Stats::time(const std::string& key, std::function<void()> f)
     auto start = std::chrono::system_clock::now();
     f();
     auto elapsed = std::chrono::system_clock::now() - start;
-    increment(key, static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()));
+    increment(key, static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count()));
 }
 
 std::string Stats::to_string() const

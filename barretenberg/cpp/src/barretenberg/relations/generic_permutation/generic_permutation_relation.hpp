@@ -68,6 +68,12 @@ template <typename Settings, typename FF_> class GenericPermutationRelationImpl 
         return Settings::inverse_polynomial_is_computed_at_row(row);
     }
 
+    template <typename AllValues> static bool operation_exists_at_poly_row(const AllValues& polys, size_t row)
+
+    {
+        return Settings::inverse_polynomial_is_computed_at_poly_row(polys, row);
+    }
+
     /**
      * @brief Get the inverse permutation polynomial (needed to compute its value)
      *
@@ -167,6 +173,28 @@ template <typename Settings, typename FF_> class GenericPermutationRelationImpl 
         return result + gamma;
     }
 
+    template <typename Accumulator, size_t read_index, typename AllEntities, typename Parameters>
+    static Accumulator compute_read_term(const AllEntities& in, size_t row, const Parameters& params)
+    {
+        using View = typename Accumulator::View;
+
+        static_assert(read_index < READ_TERMS);
+
+        // Retrieve all polynomials used
+        const auto all_polynomials = Settings::get_const_entities(in);
+
+        auto result = Accumulator(0);
+
+        // Iterate over tuple and sum as a polynomial over beta
+        bb::constexpr_for<PERMUTATION_SETS_START_POLYNOMIAL_INDEX,
+                          PERMUTATION_SETS_START_POLYNOMIAL_INDEX + Settings::COLUMNS_PER_SET,
+                          1>(
+            [&]<size_t i>() { result = result * params.beta + View(std::get<i>(all_polynomials)[row]); });
+
+        const auto& gamma = params.gamma;
+        return result + gamma;
+    }
+
     /**
      * @brief Compute the value of a single item in the set
      *
@@ -192,6 +220,27 @@ template <typename Settings, typename FF_> class GenericPermutationRelationImpl 
         bb::constexpr_for<PERMUTATION_SETS_START_POLYNOMIAL_INDEX + Settings::COLUMNS_PER_SET,
                           PERMUTATION_SETS_START_POLYNOMIAL_INDEX + 2 * Settings::COLUMNS_PER_SET,
                           1>([&]<size_t i>() { result = result * params.beta + View(std::get<i>(used_entities)); });
+
+        const auto& gamma = params.gamma;
+        return result + gamma;
+    }
+
+    template <typename Accumulator, size_t write_index, typename AllEntities, typename Parameters>
+    static Accumulator compute_write_term(const AllEntities& in, size_t row, const Parameters& params)
+    {
+        using View = typename Accumulator::View;
+
+        static_assert(write_index < WRITE_TERMS);
+
+        // Get all used entities
+        const auto& used_entities = Settings::get_const_entities(in);
+
+        auto result = Accumulator(0);
+        // Iterate over tuple and sum as a polynomial over beta
+        bb::constexpr_for<PERMUTATION_SETS_START_POLYNOMIAL_INDEX + Settings::COLUMNS_PER_SET,
+                          PERMUTATION_SETS_START_POLYNOMIAL_INDEX + 2 * Settings::COLUMNS_PER_SET,
+                          1>(
+            [&]<size_t i>() { result = result * params.beta + View(std::get<i>(used_entities)[row]); });
 
         const auto& gamma = params.gamma;
         return result + gamma;

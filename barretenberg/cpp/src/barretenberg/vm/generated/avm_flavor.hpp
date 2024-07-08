@@ -67,6 +67,13 @@
 #include "barretenberg/relations/generated/avm/lookup_u8_0.hpp"
 #include "barretenberg/relations/generated/avm/lookup_u8_1.hpp"
 #include "barretenberg/relations/generated/avm/perm_main_alu.hpp"
+#include "barretenberg/relations/generated/avm/perm_main_alu_add.hpp"
+#include "barretenberg/relations/generated/avm/perm_main_alu_cast.hpp"
+#include "barretenberg/relations/generated/avm/perm_main_alu_eq.hpp"
+#include "barretenberg/relations/generated/avm/perm_main_alu_lt.hpp"
+#include "barretenberg/relations/generated/avm/perm_main_alu_lte.hpp"
+#include "barretenberg/relations/generated/avm/perm_main_alu_mul.hpp"
+#include "barretenberg/relations/generated/avm/perm_main_alu_sub.hpp"
 #include "barretenberg/relations/generated/avm/perm_main_bin.hpp"
 #include "barretenberg/relations/generated/avm/perm_main_conv.hpp"
 #include "barretenberg/relations/generated/avm/perm_main_mem_a.hpp"
@@ -107,11 +114,11 @@ class AvmFlavor {
     using RelationSeparator = AvmFlavorSettings::RelationSeparator;
 
     static constexpr size_t NUM_PRECOMPUTED_ENTITIES = 2;
-    static constexpr size_t NUM_WITNESS_ENTITIES = 385;
+    static constexpr size_t NUM_WITNESS_ENTITIES = 392;
     static constexpr size_t NUM_WIRES = NUM_WITNESS_ENTITIES + NUM_PRECOMPUTED_ENTITIES;
     // We have two copies of the witness entities, so we subtract the number of fixed ones (they have no shift), one for
     // the unshifted and one for the shifted
-    static constexpr size_t NUM_ALL_ENTITIES = 452;
+    static constexpr size_t NUM_ALL_ENTITIES = 459;
 
     using MainRelations = std::tuple<
         // Relations
@@ -131,6 +138,13 @@ class AvmFlavor {
     using LookupRelations = std::tuple<
         // Lookups
         perm_main_alu_relation<FF>,
+        perm_main_alu_add_relation<FF>,
+        perm_main_alu_sub_relation<FF>,
+        perm_main_alu_mul_relation<FF>,
+        perm_main_alu_cast_relation<FF>,
+        perm_main_alu_lt_relation<FF>,
+        perm_main_alu_lte_relation<FF>,
+        perm_main_alu_eq_relation<FF>,
         perm_main_bin_relation<FF>,
         perm_main_conv_relation<FF>,
         perm_main_pos2_perm_relation<FF>,
@@ -556,6 +570,13 @@ class AvmFlavor {
       public:
         DEFINE_FLAVOR_MEMBERS(DataType,
                               perm_main_alu,
+                              perm_main_alu_add,
+                              perm_main_alu_sub,
+                              perm_main_alu_mul,
+                              perm_main_alu_cast,
+                              perm_main_alu_lt,
+                              perm_main_alu_lte,
+                              perm_main_alu_eq,
                               perm_main_bin,
                               perm_main_conv,
                               perm_main_pos2_perm,
@@ -1244,6 +1265,13 @@ class AvmFlavor {
             Base::sha256_sel_sha256_compression = "SHA256_SEL_SHA256_COMPRESSION";
             Base::sha256_state = "SHA256_STATE";
             Base::perm_main_alu = "PERM_MAIN_ALU";
+            Base::perm_main_alu_add = "PERM_MAIN_ALU_ADD";
+            Base::perm_main_alu_sub = "PERM_MAIN_ALU_SUB";
+            Base::perm_main_alu_mul = "PERM_MAIN_ALU_MUL";
+            Base::perm_main_alu_cast = "PERM_MAIN_ALU_CAST";
+            Base::perm_main_alu_lt = "PERM_MAIN_ALU_LT";
+            Base::perm_main_alu_lte = "PERM_MAIN_ALU_LTE";
+            Base::perm_main_alu_eq = "PERM_MAIN_ALU_EQ";
             Base::perm_main_bin = "PERM_MAIN_BIN";
             Base::perm_main_conv = "PERM_MAIN_CONV";
             Base::perm_main_pos2_perm = "PERM_MAIN_POS2_PERM";

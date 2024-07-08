@@ -23,6 +23,11 @@ class lookup_pow_2_1_lookup_settings {
         return (in.alu_sel_shift_which == 1 || in.main_sel_rng_8 == 1);
     }
 
+    template <typename Polys> static inline auto inverse_polynomial_is_computed_at_poly_row(const Polys& in, size_t row)
+    {
+        return (in.alu_sel_shift_which[row] == 1 || in.main_sel_rng_8[row] == 1);
+    }
+
     template <typename Accumulator, typename AllEntities>
     static inline auto compute_inverse_exists(const AllEntities& in)
     {

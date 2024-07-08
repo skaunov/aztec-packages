@@ -29,8 +29,8 @@ class AvmCircuitBuilder {
     using Polynomial = Flavor::Polynomial;
     using ProverPolynomials = Flavor::ProverPolynomials;
 
-    static constexpr size_t num_fixed_columns = 387;
-    static constexpr size_t num_polys = 387 + 65;
+    static constexpr size_t num_fixed_columns = 394;
+    static constexpr size_t num_polys = 394 + 65;
     std::vector<Row> rows;
 
     void set_trace(std::vector<Row>&& trace) { rows = std::move(trace); }
@@ -459,6 +459,7 @@ class AvmCircuitBuilder {
 
     [[maybe_unused]] bool check_circuit()
     {
+        vinfo("------- CHECKING CIRCUIT -------");
         const FF gamma = FF::random_element();
         const FF beta = FF::random_element();
         bb::RelationParameters<typename Flavor::FF> params{
@@ -504,7 +505,7 @@ class AvmCircuitBuilder {
 
         const auto evaluate_logderivative = [&]<typename LogDerivativeSettings>(const std::string& lookup_name) {
             // Check the logderivative relation
-            bb::compute_logderivative_inverse<Flavor, LogDerivativeSettings>(polys, params, num_rows);
+            bb::compute_logderivative_inverse<Flavor, LogDerivativeSettings>(polys, params, num_rows, lookup_name);
 
             typename LogDerivativeSettings::SumcheckArrayOfValuesOverSubrelations lookup_result;
 
@@ -572,6 +573,27 @@ class AvmCircuitBuilder {
         // Check lookups
         auto perm_main_alu = [=]() {
             return evaluate_logderivative.template operator()<perm_main_alu_relation<FF>>("PERM_MAIN_ALU");
+        };
+        auto perm_main_alu_add = [=]() {
+            return evaluate_logderivative.template operator()<perm_main_alu_add_relation<FF>>("PERM_MAIN_ALU_ADD");
+        };
+        auto perm_main_alu_sub = [=]() {
+            return evaluate_logderivative.template operator()<perm_main_alu_sub_relation<FF>>("PERM_MAIN_ALU_SUB");
+        };
+        auto perm_main_alu_mul = [=]() {
+            return evaluate_logderivative.template operator()<perm_main_alu_mul_relation<FF>>("PERM_MAIN_ALU_MUL");
+        };
+        auto perm_main_alu_cast = [=]() {
+            return evaluate_logderivative.template operator()<perm_main_alu_cast_relation<FF>>("PERM_MAIN_ALU_CAST");
+        };
+        auto perm_main_alu_lt = [=]() {
+            return evaluate_logderivative.template operator()<perm_main_alu_lt_relation<FF>>("PERM_MAIN_ALU_LT");
+        };
+        auto perm_main_alu_lte = [=]() {
+            return evaluate_logderivative.template operator()<perm_main_alu_lte_relation<FF>>("PERM_MAIN_ALU_LTE");
+        };
+        auto perm_main_alu_eq = [=]() {
+            return evaluate_logderivative.template operator()<perm_main_alu_eq_relation<FF>>("PERM_MAIN_ALU_EQ");
         };
         auto perm_main_bin = [=]() {
             return evaluate_logderivative.template operator()<perm_main_bin_relation<FF>>("PERM_MAIN_BIN");
@@ -762,6 +784,13 @@ class AvmCircuitBuilder {
         relation_futures.emplace_back(std::async(std::launch::async, powers));
         relation_futures.emplace_back(std::async(std::launch::async, sha256));
         relation_futures.emplace_back(std::async(std::launch::async, perm_main_alu));
+        relation_futures.emplace_back(std::async(std::launch::async, perm_main_alu_add));
+        relation_futures.emplace_back(std::async(std::launch::async, perm_main_alu_sub));
+        relation_futures.emplace_back(std::async(std::launch::async, perm_main_alu_mul));
+        relation_futures.emplace_back(std::async(std::launch::async, perm_main_alu_cast));
+        relation_futures.emplace_back(std::async(std::launch::async, perm_main_alu_lt));
+        relation_futures.emplace_back(std::async(std::launch::async, perm_main_alu_lte));
+        relation_futures.emplace_back(std::async(std::launch::async, perm_main_alu_eq));
         relation_futures.emplace_back(std::async(std::launch::async, perm_main_bin));
         relation_futures.emplace_back(std::async(std::launch::async, perm_main_conv));
         relation_futures.emplace_back(std::async(std::launch::async, perm_main_pos2_perm));

@@ -23,6 +23,11 @@ class lookup_byte_operations_lookup_settings {
         return (in.binary_sel_bin == 1 || in.byte_lookup_sel_bin == 1);
     }
 
+    template <typename Polys> static inline auto inverse_polynomial_is_computed_at_poly_row(const Polys& in, size_t row)
+    {
+        return (in.binary_sel_bin[row] == 1 || in.byte_lookup_sel_bin[row] == 1);
+    }
+
     template <typename Accumulator, typename AllEntities>
     static inline auto compute_inverse_exists(const AllEntities& in)
     {

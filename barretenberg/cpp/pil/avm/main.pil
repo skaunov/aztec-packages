@@ -678,6 +678,42 @@ namespace main(256);
                      alu.op_mul, alu.op_div, alu.op_eq, alu.op_not, alu.op_cast,
                      alu.op_lt, alu.op_lte, alu.op_shr, alu.op_shl, alu.in_tag};
 
+    /// EXPERIMENT ///
+    #[PERM_MAIN_ALU_add]
+    sel_op_add {clk, ia, ib, ic}
+    is
+    alu.op_add {alu.clk, alu.ia, alu.ib, alu.ic};
+
+    #[PERM_MAIN_ALU_sub]
+    sel_op_sub {clk, ia, ib, ic}
+    is
+    alu.op_sub {alu.clk, alu.ia, alu.ib, alu.ic};
+
+    #[PERM_MAIN_ALU_mul]
+    sel_op_mul {clk, ia, ib, ic}
+    is
+    alu.op_mul {alu.clk, alu.ia, alu.ib, alu.ic};
+
+    #[PERM_MAIN_ALU_cast]
+    sel_op_cast {clk, ia, ib, ic}
+    is
+    alu.op_cast {alu.clk, alu.ia, alu.ib, alu.ic};
+
+    #[PERM_MAIN_ALU_lt]
+    sel_op_lt {clk, ia, ib, ic}
+    is
+    alu.op_lt {alu.clk, alu.ia, alu.ib, alu.ic};
+
+    #[PERM_MAIN_ALU_lte]
+    sel_op_lte {clk, ia, ib, ic}
+    is
+    alu.op_lte {alu.clk, alu.ia, alu.ib, alu.ic};
+
+    #[PERM_MAIN_ALU_eq]
+    sel_op_eq {clk, ia, ib, ic}
+    is
+    alu.op_eq {alu.clk, alu.ia, alu.ib, alu.ic};
+
     // Based on the boolean selectors, we derive the binary op id to lookup in the table;
     // TODO: Check if having 4 columns (op_id + 3 boolean selectors) is more optimal that just using the op_id
     // but with a higher degree constraint: op_id * (op_id - 1) * (op_id - 2)

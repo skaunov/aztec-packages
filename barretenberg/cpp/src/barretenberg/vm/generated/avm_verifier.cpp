@@ -80,6 +80,20 @@ bool AvmVerifier::verify_proof(const HonkProof& proof, const std::vector<std::ve
 
     // Get commitments to inverses
     commitments.perm_main_alu = transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_alu);
+    commitments.perm_main_alu_add =
+        transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_alu_add);
+    commitments.perm_main_alu_sub =
+        transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_alu_sub);
+    commitments.perm_main_alu_mul =
+        transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_alu_mul);
+    commitments.perm_main_alu_cast =
+        transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_alu_cast);
+    commitments.perm_main_alu_lt =
+        transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_alu_lt);
+    commitments.perm_main_alu_lte =
+        transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_alu_lte);
+    commitments.perm_main_alu_eq =
+        transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_alu_eq);
     commitments.perm_main_bin = transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_bin);
     commitments.perm_main_conv = transcript->template receive_from_prover<Commitment>(commitment_labels.perm_main_conv);
     commitments.perm_main_pos2_perm =

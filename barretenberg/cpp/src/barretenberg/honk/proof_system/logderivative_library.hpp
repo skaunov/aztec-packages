@@ -1,27 +1,11 @@
 #pragma once
+#include "barretenberg/vm/avm_trace/stats.hpp"
+#include <mutex>
+#include <type_traits>
 #include <typeinfo>
 
 namespace bb {
 
-/**
- * @brief Compute the inverse polynomial I(X) required for logderivative lookups
- * *
- * details
- * Inverse may be defined in terms of its values  on X_i = 0,1,...,n-1 as Z_perm[0] = 1 and for i = 1:n-1
- *                           1                              1
- * Inverse[i] = ∏ -------------------------- * ∏' --------------------------
- *                  relation::read_term(j)         relation::write_term(j)
- *
- * where ∏ := ∏_{j=0:relation::NUM_READ_TERMS-1} and ∏' := ∏'_{j=0:relation::NUM_WRITE_TERMS-1}
- *
- * If row [i] does not contain a lookup read gate or a write gate, Inverse[i] = 0
- * N.B. by "write gate" we mean; do the lookup table polynomials contain nonzero values at this row?
- * (in the ECCVM, the lookup table is not precomputed, so we have a concept of a "write gate", unlike when precomputed
- * lookup tables are used)
- *
- * The specific algebraic relations that define read terms and write terms are defined in Flavor::LookupRelation
- *
- */
 template <typename Flavor, typename Relation, typename Polynomials>
 void compute_logderivative_inverse(Polynomials& polynomials, auto& relation_parameters, const size_t circuit_size)
 {
@@ -54,6 +38,114 @@ void compute_logderivative_inverse(Polynomials& polynomials, auto& relation_para
 
     // todo might be inverting zero in field bleh bleh
     FF::batch_invert(inverse_polynomial);
+}
+
+/////// BEFORE
+//// AVM VERSION
+template <typename Flavor, typename Relation, typename Polynomials>
+void compute_logderivative_inverse_old(Polynomials& polynomials,
+                                       auto& relation_parameters,
+                                       const size_t circuit_size,
+                                       const std::string& name)
+{
+    using FF = typename Flavor::FF;
+    using Accumulator = typename Relation::ValueAccumulator0;
+    constexpr size_t READ_TERMS = Relation::READ_TERMS;
+    constexpr size_t WRITE_TERMS = Relation::WRITE_TERMS;
+
+    auto& inverse_polynomial = Relation::template get_inverse_polynomial(polynomials);
+    const std::string key_getrow = name + "/getrow_µs";
+    const std::string key_exists = name + "/exists_µs";
+    const std::string key_read = name + "/read_µs";
+    const std::string key_write = name + "/write_µs";
+
+    AVM_TRACK_TIME(name + "/loop_µs", ({
+                       for (size_t i = 0; i < circuit_size; ++i) {
+                           typename Flavor::AllValues row;
+                           AVM_TRACK_TIME(key_getrow, (row = polynomials.get_row(i)));
+                           bool has_inverse = false;
+                           AVM_TRACK_TIME(key_exists, (has_inverse = Relation::operation_exists_at_row(row)));
+                           if (!has_inverse) {
+                               continue;
+                           }
+                           FF denominator = 1;
+                           AVM_TRACK_TIME(key_read, ({
+                                              bb::constexpr_for<0, READ_TERMS, 1>([&]<size_t read_index> {
+                                                  auto denominator_term =
+                                                      Relation::template compute_read_term<Accumulator, read_index>(
+                                                          row, relation_parameters);
+                                                  denominator *= denominator_term;
+                                              });
+                                          }));
+                           AVM_TRACK_TIME(key_write, ({
+                                              bb::constexpr_for<0, WRITE_TERMS, 1>([&]<size_t write_index> {
+                                                  auto denominator_term =
+                                                      Relation::template compute_write_term<Accumulator, write_index>(
+                                                          row, relation_parameters);
+                                                  denominator *= denominator_term;
+                                              });
+                                          }));
+                           inverse_polynomial[i] = denominator;
+                       };
+                   }));
+
+    // todo might be inverting zero in field bleh bleh
+    AVM_TRACK_TIME(name + "/batch_invert_µs", (FF::batch_invert(inverse_polynomial)));
+}
+
+// //// AVM VERSION
+template <typename Flavor, typename Relation, typename Polynomials>
+void compute_logderivative_inverse(Polynomials& polynomials,
+                                   auto& relation_parameters,
+                                   const size_t circuit_size,
+                                   const std::string& name)
+{
+    using FF = typename Flavor::FF;
+    using Accumulator = typename Relation::ValueAccumulator0;
+    constexpr size_t READ_TERMS = Relation::READ_TERMS;
+    constexpr size_t WRITE_TERMS = Relation::WRITE_TERMS;
+
+    auto& inverse_polynomial = Relation::template get_inverse_polynomial(polynomials);
+    const std::string key_getrow = name + "/getrow_µs";
+    const std::string key_exists = name + "/exists_µs";
+    const std::string key_read = name + "/read_µs";
+    const std::string key_write = name + "/write_µs";
+    const std::string key_has_inverse = name + "/has_inverse";
+    const std::string key_not_has_inverse = name + "/not_has_inverse";
+
+    AVM_TRACK_TIME(name + "/loop_µs", ({
+                       for (size_t i = 0; i < circuit_size; ++i) {
+                           bool has_inverse = false;
+                           AVM_TRACK_TIME(key_exists,
+                                          ({ has_inverse = Relation::operation_exists_at_poly_row(polynomials, i); }));
+                           if (!has_inverse) {
+                               avm_trace::Stats::get().increment(key_not_has_inverse, 1);
+                               continue;
+                           }
+                           avm_trace::Stats::get().increment(key_has_inverse, 1);
+                           FF denominator = FF::one(); // 1;
+                           AVM_TRACK_TIME(key_read, ({
+                                              bb::constexpr_for<0, READ_TERMS, 1>([&]<size_t read_index> {
+                                                  auto denominator_term =
+                                                      Relation::template compute_read_term<Accumulator, read_index>(
+                                                          polynomials, i, relation_parameters);
+                                                  denominator *= denominator_term;
+                                              });
+                                          }));
+                           AVM_TRACK_TIME(key_write, ({
+                                              bb::constexpr_for<0, WRITE_TERMS, 1>([&]<size_t write_index> {
+                                                  auto denominator_term =
+                                                      Relation::template compute_write_term<Accumulator, write_index>(
+                                                          polynomials, i, relation_parameters);
+                                                  denominator *= denominator_term;
+                                              });
+                                          }));
+                           inverse_polynomial[i] = denominator;
+                       };
+                   }));
+
+    // todo might be inverting zero in field bleh bleh
+    AVM_TRACK_TIME(name + "/batch_invert_µs", (FF::batch_invert(inverse_polynomial)));
 }
 
 /**

@@ -311,6 +311,13 @@ template <typename FF> std::vector<std::string> AvmFullRow<FF>::names()
              "sha256_sel_sha256_compression",
              "sha256_state",
              "perm_main_alu",
+             "perm_main_alu_add",
+             "perm_main_alu_sub",
+             "perm_main_alu_mul",
+             "perm_main_alu_cast",
+             "perm_main_alu_lt",
+             "perm_main_alu_lte",
+             "perm_main_alu_eq",
              "perm_main_bin",
              "perm_main_conv",
              "perm_main_pos2_perm",
@@ -702,6 +709,13 @@ template <typename FF> std::ostream& operator<<(std::ostream& os, AvmFullRow<FF>
               << "," << field_to_string(row.sha256_sel_sha256_compression)                 //
               << "," << field_to_string(row.sha256_state)                                  //
               << "," << field_to_string(row.perm_main_alu)                                 //
+              << "," << field_to_string(row.perm_main_alu_add)                             //
+              << "," << field_to_string(row.perm_main_alu_sub)                             //
+              << "," << field_to_string(row.perm_main_alu_mul)                             //
+              << "," << field_to_string(row.perm_main_alu_cast)                            //
+              << "," << field_to_string(row.perm_main_alu_lt)                              //
+              << "," << field_to_string(row.perm_main_alu_lte)                             //
+              << "," << field_to_string(row.perm_main_alu_eq)                              //
               << "," << field_to_string(row.perm_main_bin)                                 //
               << "," << field_to_string(row.perm_main_conv)                                //
               << "," << field_to_string(row.perm_main_pos2_perm)                           //

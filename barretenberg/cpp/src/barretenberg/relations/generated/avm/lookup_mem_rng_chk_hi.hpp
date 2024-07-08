@@ -23,6 +23,11 @@ class lookup_mem_rng_chk_hi_lookup_settings {
         return (in.mem_sel_rng_chk == 1 || in.main_sel_rng_8 == 1);
     }
 
+    template <typename Polys> static inline auto inverse_polynomial_is_computed_at_poly_row(const Polys& in, size_t row)
+    {
+        return (in.mem_sel_rng_chk[row] == 1 || in.main_sel_rng_8[row] == 1);
+    }
+
     template <typename Accumulator, typename AllEntities>
     static inline auto compute_inverse_exists(const AllEntities& in)
     {

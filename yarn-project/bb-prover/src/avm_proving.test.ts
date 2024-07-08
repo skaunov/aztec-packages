@@ -50,7 +50,7 @@ import { SerializableContractInstance } from '../../types/src/contracts/contract
 import { type BBSuccess, BB_RESULT, generateAvmProof, verifyAvmProof } from './bb/execute.js';
 import { extractVkData } from './verification_key/verification_key_data.js';
 
-const TIMEOUT = 60_000;
+const TIMEOUT = 600_000;
 const TIMESTAMP = new Fr(99833);
 
 describe('AVM WitGen, proof generation and verification', () => {
@@ -232,9 +232,6 @@ const proveAndVerifyAvmTestContract = async (
 
   const startGas = new Gas(context.machineState.gasLeft.daGas, context.machineState.gasLeft.l2Gas);
 
-  const internalLogger = createDebugLogger('aztec:avm-proving-test');
-  const logger = (msg: string, _data?: any) => internalLogger.verbose(msg);
-
   // Use a simple contract that emits a side effect
   const bytecode = getAvmTestContractBytecode(functionName);
   // The paths for the barretenberg binary and the write path are hardcoded for now.
@@ -270,7 +267,30 @@ const proveAndVerifyAvmTestContract = async (
     /*avmHints=*/ pxResult.avmCircuitHints,
   );
 
+  const internalLogger = createDebugLogger('aztec:avm-proving-test');
+  const times: Map<string, number> = new Map();
+  const logger = (msg: string, _data?: any) => {
+    for (const line of msg.split('\n')) {
+      const [, name, value] = line.match(/([a-zA-Z_\d/µ]+): (\d+)/) || [];
+      if (!name || !value) {
+        continue;
+      }
+      times.set(name, (times.get(name) ?? 0) + +value);
+    }
+  };
+
   // Then we prove.
+  // const rlogger = (msg: string, _data?: any) => internalLogger.info(msg);
+  const REPEAT = 10;
+  for (let i = 0; i < REPEAT; i++) {
+    internalLogger.info(`Iteration ${i}`);
+    const proofRes = await generateAvmProof(bbPath, bbWorkingDirectory, avmCircuitInputs, logger);
+    expect(proofRes.status).toEqual(BB_RESULT.SUCCESS);
+  }
+  for (const [k, v] of times.entries()) {
+    internalLogger.info(`${k}: ${Math.ceil(v / REPEAT / 1000)}`);
+  }
+
   const proofRes = await generateAvmProof(bbPath, bbWorkingDirectory, avmCircuitInputs, logger);
   expect(proofRes.status).toEqual(BB_RESULT.SUCCESS);
 

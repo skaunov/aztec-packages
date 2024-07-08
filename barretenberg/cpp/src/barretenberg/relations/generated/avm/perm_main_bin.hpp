@@ -17,6 +17,11 @@ class perm_main_bin_permutation_settings {
         return (in.main_sel_bin == 1 || in.binary_start == 1);
     }
 
+    template <typename Polys> static inline auto inverse_polynomial_is_computed_at_poly_row(const Polys& in, size_t row)
+    {
+        return (in.main_sel_bin[row] == 1 || in.binary_start[row] == 1);
+    }
+
     template <typename AllEntities> static inline auto get_const_entities(const AllEntities& in)
     {
         return std::forward_as_tuple(in.perm_main_bin,

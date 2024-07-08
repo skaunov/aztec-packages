@@ -23,6 +23,11 @@ class lookup_into_kernel_lookup_settings {
         return (in.main_sel_q_kernel_lookup == 1 || in.kernel_q_public_input_kernel_add_to_table == 1);
     }
 
+    template <typename Polys> static inline auto inverse_polynomial_is_computed_at_poly_row(const Polys& in, size_t row)
+    {
+        return (in.main_sel_q_kernel_lookup[row] == 1 || in.kernel_q_public_input_kernel_add_to_table[row] == 1);
+    }
+
     template <typename Accumulator, typename AllEntities>
     static inline auto compute_inverse_exists(const AllEntities& in)
     {

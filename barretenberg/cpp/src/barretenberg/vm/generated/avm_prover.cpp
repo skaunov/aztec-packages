@@ -11,6 +11,9 @@
 
 #include "barretenberg/vm/avm_trace/stats.hpp"
 
+#include <future>
+#include <vector>
+
 namespace bb {
 
 using Flavor = AvmFlavor;
@@ -21,17 +24,20 @@ namespace {
 // Loops through LookupRelations and calculates the logderivatives.
 // Metaprogramming is used to loop through the relations, because they are types.
 template <size_t relation_idx = 0, typename PP>
-void compute_logderivative_rel(const RelationParameters<FF>& relation_parameters,
+void compute_logderivative_rel(std::vector<std::future<void>>& futures,
+                               const RelationParameters<FF>& relation_parameters,
                                PP& prover_polynomials,
                                size_t circuit_size)
 {
-    using Relation = std::tuple_element_t<relation_idx, Flavor::LookupRelations>;
-    AVM_TRACK_TIME(
-        Relation::NAME + std::string("_ms"),
-        (compute_logderivative_inverse<Flavor, Relation>(prover_polynomials, relation_parameters, circuit_size)));
+    futures.push_back(std::async(std::launch::async, [&]() {
+        using Relation = std::tuple_element_t<relation_idx, Flavor::LookupRelations>;
+        AVM_TRACK_TIME(Relation::NAME + std::string("_µs"),
+                       (compute_logderivative_inverse<Flavor, Relation>(
+                           prover_polynomials, relation_parameters, circuit_size, Relation::NAME)));
+    }));
 
     if constexpr (relation_idx + 1 < std::tuple_size_v<Flavor::LookupRelations>) {
-        compute_logderivative_rel<relation_idx + 1, PP>(relation_parameters, prover_polynomials, circuit_size);
+        compute_logderivative_rel<relation_idx + 1, PP>(futures, relation_parameters, prover_polynomials, circuit_size);
     }
 }
 
@@ -92,13 +98,25 @@ void AvmProver::execute_log_derivative_inverse_round()
     relation_parameters.beta = beta;
     relation_parameters.gamma = gamm;
 
-    auto prover_polynomials = ProverPolynomials(*key);
-    compute_logderivative_rel(relation_parameters, prover_polynomials, key->circuit_size);
+    std::vector<std::future<void>> futures;
 
-    // Commit to all logderivative inverse polynomials
-    for (auto [commitment, key_poly] : zip_view(witness_commitments.get_derived(), key->get_derived())) {
-        commitment = commitment_key->commit(key_poly);
-    }
+    auto prover_polynomials = ProverPolynomials(*key);
+    compute_logderivative_rel(futures, relation_parameters, prover_polynomials, key->circuit_size);
+
+    // Wait for lookup evaluations to complete
+    AVM_TRACK_TIME("logdev_futures", ({
+                       for (auto& future : futures) {
+                           future.get();
+                       }
+                   }));
+
+    AVM_TRACK_TIME("logdev_commitments", ({
+                       // Commit to all logderivative inverse polynomials
+                       for (auto [commitment, key_poly] :
+                            zip_view(witness_commitments.get_derived(), key->get_derived())) {
+                           commitment = commitment_key->commit(key_poly);
+                       }
+                   }));
 
     // Send all commitments to the verifier
     for (auto [label, commitment] : zip_view(commitment_labels.get_derived(), witness_commitments.get_derived())) {
@@ -150,22 +168,24 @@ HonkProof AvmProver::export_proof()
 
 HonkProof AvmProver::construct_proof()
 {
+    vinfo("------- PROVING -------");
+
     // Add circuit size public input size and public inputs to transcript.
     execute_preamble_round();
 
     // Compute wire commitments
-    execute_wire_commitments_round();
+    AVM_TRACK_TIME("prove/wire_commitments", execute_wire_commitments_round());
 
     // Compute sorted list accumulator and commitment
-    execute_log_derivative_inverse_round();
+    AVM_TRACK_TIME("prove/logdev", execute_log_derivative_inverse_round());
 
     // Fiat-Shamir: alpha
     // Run sumcheck subprotocol.
-    execute_relation_check_rounds();
+    AVM_TRACK_TIME("prove/sumcheck", execute_relation_check_rounds());
 
     // Fiat-Shamir: rho, y, x, z
     // Execute Zeromorph multilinear PCS
-    execute_pcs_rounds();
+    AVM_TRACK_TIME("prove/pcs_rounds", execute_pcs_rounds());
 
     return export_proof();
 }
