@@ -17,14 +17,18 @@ struct PrivateKernelData {
 
 impl PrivateKernelData {
     fn validate_in_vk_tree<N>(self, allowed_indices: [u32; N]) {
-        let index_hint = find_index_hint(allowed_indices, self.vk_index);
-        assert_eq(allowed_indices[index_hint], self.vk_index, "Invalid vk index");
+        // TODO(#7410) we need the tube VKs in here for this to be valid
+        // We use a special index for now
+        if self.vk_path != TUBE_VK_PLACEHOLDER_PATH {
+            let index_hint = find_index_hint(allowed_indices, self.vk_index);
+            assert_eq(allowed_indices[index_hint], self.vk_index, "Invalid vk index");
 
-        assert_check_membership(
-            self.vk.hash,
-            self.vk_index as Field,
-            self.vk_path,
-            self.public_inputs.constants.vk_tree_root
-        );
+            assert_check_membership(
+                self.vk.hash,
+                self.vk_index as Field,
+                self.vk_path,
+                self.public_inputs.constants.vk_tree_root
+            );
+        }
     }
 }

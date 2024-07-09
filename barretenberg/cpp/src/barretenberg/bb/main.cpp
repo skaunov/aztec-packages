@@ -569,6 +569,95 @@ void prove_tube(const std::string& output_path)
 }
 
 /**
+ * @brief Creates a verification key for the Tube circuit responsible for recursively verifying a ClientIVC proof.
+ *
+ * @param output_path the working directory from which the proof and verification data are read
+ * @param num_unused_public_inputs
+ */
+void write_tube_vk(const std::string& output_path)
+{
+    using ClientIVC = stdlib::recursion::honk::ClientIVCRecursiveVerifier;
+    using NativeInstance = ClientIVC::FoldVerifierInput::Instance;
+    using InstanceFlavor = MegaFlavor;
+    using ECCVMVk = ECCVMFlavor::VerificationKey;
+    using TranslatorVk = TranslatorFlavor::VerificationKey;
+    using FoldVerifierInput = ClientIVC::FoldVerifierInput;
+    using GoblinVerifierInput = ClientIVC::GoblinVerifierInput;
+    using VerifierInput = ClientIVC::VerifierInput;
+    using Builder = UltraCircuitBuilder;
+    using GrumpkinVk = bb::VerifierCommitmentKey<curve::Grumpkin>;
+
+    std::string vkPath = output_path + "/inst_vk"; // the vk of the last instance
+    std::string accPath = output_path + "/pg_acc";
+    std::string proofPath = output_path + "/client_ivc_proof";
+    std::string translatorVkPath = output_path + "/translator_vk";
+    std::string eccVkPath = output_path + "/ecc_vk";
+
+    // Note: this could be decreased once we optimise the size of the ClientIVC recursiveve rifier
+    init_bn254_crs(1 << 25);
+    init_grumpkin_crs(1 << 18);
+
+    // Read the proof  and verification data from given files
+    auto proof = from_buffer<ClientIVC::Proof>(read_file(proofPath));
+    std::shared_ptr<InstanceFlavor::VerificationKey> instance_vk = std::make_shared<InstanceFlavor::VerificationKey>(
+        from_buffer<InstanceFlavor::VerificationKey>(read_file(vkPath)));
+    std::shared_ptr<NativeInstance> verifier_accumulator =
+        std::make_shared<NativeInstance>(from_buffer<NativeInstance>(read_file(accPath)));
+    std::shared_ptr<TranslatorVk> translator_vk =
+        std::make_shared<TranslatorVk>(from_buffer<TranslatorVk>(read_file(translatorVkPath)));
+    std::shared_ptr<ECCVMVk> eccvm_vk = std::make_shared<ECCVMVk>(from_buffer<ECCVMVk>(read_file(eccVkPath)));
+    // We don't serialise and deserialise the Grumkin SRS so initialise with circuit_size + 1 to be able to recursively
+    // IPA. The + 1 is to satisfy IPA verification key requirements.
+    // TODO(https://github.com/AztecProtocol/barretenberg/issues/1025)
+    eccvm_vk->pcs_verification_key = std::make_shared<GrumpkinVk>(eccvm_vk->circuit_size + 1);
+
+    FoldVerifierInput fold_verifier_input{ verifier_accumulator, { instance_vk } };
+    GoblinVerifierInput goblin_verifier_input{ eccvm_vk, translator_vk };
+    VerifierInput input{ fold_verifier_input, goblin_verifier_input };
+    auto builder = std::make_shared<Builder>();
+    // Padding needed for sending the right number of public inputs
+    // TODO(https://github.com/AztecProtocol/barretenberg/issues/1048): INSECURE - make this tube proof actually use
+    // these public inputs by turning proof into witnesses and call
+    // set_public on each witness
+    auto num_public_inputs = (size_t)proof.folding_proof[1];
+    for (size_t i = 0; i < num_public_inputs; i++) {
+        // We offset 3
+        builder->add_public_variable(proof.folding_proof[i + 3]);
+    }
+    ClientIVC verifier{ builder, input };
+
+    verifier.verify(proof);
+    info("num gates: ", builder->get_num_gates());
+    info("generating proof");
+    using Prover = UltraProver_<UltraFlavor>;
+    using Verifier = UltraVerifier_<UltraFlavor>;
+    Prover tube_prover{ *builder };
+    auto tube_proof = tube_prover.construct_proof();
+    std::string tubeProofPath = output_path + "/proof";
+    write_file(tubeProofPath, to_buffer<true>(tube_proof));
+
+    std::string tubeProofAsFieldsPath = output_path + "/proof_fields.json";
+    auto proof_data = to_json(tube_proof);
+    write_file(tubeProofAsFieldsPath, { proof_data.begin(), proof_data.end() });
+
+    std::string tubeVkPath = output_path + "/vk";
+    auto tube_verification_key =
+        std::make_shared<typename UltraFlavor::VerificationKey>(tube_prover.instance->proving_key);
+    write_file(tubeVkPath, to_buffer(tube_verification_key));
+
+    std::string tubeAsFieldsVkPath = output_path + "/vk_fields.json";
+    auto field_els = tube_verification_key->to_field_elements();
+    info("verificaton key length in fields:", field_els.size());
+    auto data = to_json(field_els);
+    write_file(tubeAsFieldsVkPath, { data.begin(), data.end() });
+
+    info("Native verification of the tube_proof");
+    Verifier tube_verifier(tube_verification_key);
+    bool verified = tube_verifier.verify_proof(tube_proof);
+    info("Tube proof verification: ", verified);
+}
+
+/**
  * @brief Creates a proof for an ACIR circuit
  *
  * Communication:

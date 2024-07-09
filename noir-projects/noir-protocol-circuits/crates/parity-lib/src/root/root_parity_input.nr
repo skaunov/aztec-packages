@@ -37,11 +37,15 @@ impl Verifiable for RootParityInput {
 
 impl RootParityInput {
     fn validate_in_vk_tree(self) {
-        assert_check_membership(
-            self.verification_key.hash,
-            BASE_PARITY_INDEX as Field,
-            self.vk_path,
-            self.public_inputs.vk_tree_root
-        );
+        // TODO(#7410) we need the tube VKs in here for this to be valid
+        // We use a special index for now
+        if self.vk_path != TUBE_VK_PLACEHOLDER_PATH {
+            assert_check_membership(
+                self.verification_key.hash,
+                BASE_PARITY_INDEX as Field,
+                self.vk_path,
+                self.public_inputs.vk_tree_root
+            );
+        }
     }
 }

@@ -38,14 +38,18 @@ impl Empty for PreviousRollupData {
 
 impl PreviousRollupData {
     fn validate_in_vk_tree<N>(self, allowed_indices: [u32; N]) {
-        let index_hint = find_index_hint(allowed_indices, self.vk_witness.leaf_index as u32);
-        assert_eq(allowed_indices[index_hint], self.vk_witness.leaf_index as u32, "Invalid vk index");
+        // TODO(#7410) we need the tube VKs in here for this to be valid
+        // We use a special index for now
+        if self.vk_witness.sibling_path != TUBE_VK_PLACEHOLDER_PATH {
+            let index_hint = find_index_hint(allowed_indices, self.vk_witness.leaf_index as u32);
+            assert_eq(allowed_indices[index_hint], self.vk_witness.leaf_index as u32, "Invalid vk index");
 
-        assert_check_membership(
-            self.vk.hash,
-            self.vk_witness.leaf_index,
-            self.vk_witness.sibling_path,
-            self.base_or_merge_rollup_public_inputs.constants.vk_tree_root
-        );
+            assert_check_membership(
+                self.vk.hash,
+                self.vk_witness.leaf_index,
+                self.vk_witness.sibling_path,
+                self.base_or_merge_rollup_public_inputs.constants.vk_tree_root
+            );
+        }
     }
 }
