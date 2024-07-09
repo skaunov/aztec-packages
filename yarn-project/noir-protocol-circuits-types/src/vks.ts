@@ -60,7 +60,7 @@ function keyJsonToVKData(json: VkJson): VerificationKeyData {
   return new VerificationKeyData(
     new VerificationKeyAsFields(
       assertLength(
-        keyAsFields.slice(1).map((str: string) => new Fr(Buffer.from(str.slice(2), 'hex'))),
+        keyAsFields.map((str: string) => new Fr(Buffer.from(str.slice(2), 'hex'))),
         VERIFICATION_KEY_LENGTH_IN_FIELDS,
       ),
       new Fr(Buffer.from(keyAsFields[0].slice(2), 'hex')),
