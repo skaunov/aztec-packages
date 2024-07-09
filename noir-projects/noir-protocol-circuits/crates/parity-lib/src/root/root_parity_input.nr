@@ -1,7 +1,7 @@
 use dep::types::{
     traits::Empty,
     recursion::{verification_key::VerificationKey, proof::RecursiveProof, traits::Verifiable},
-    constants::{BASE_PARITY_INDEX, VK_TREE_HEIGHT}, merkle_tree::membership::assert_check_membership
+    constants::{BASE_PARITY_INDEX, VK_TREE_HEIGHT, TUBE_VK_PLACEHOLDER_PATH}, merkle_tree::membership::assert_check_membership
 };
 use crate::parity_public_inputs::ParityPublicInputs;
 
