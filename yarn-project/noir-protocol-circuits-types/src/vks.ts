@@ -146,6 +146,10 @@ export function getVKTreeRoot() {
   return Fr.fromBuffer(getVKTree().root);
 }
 
+// TODO(#7410) this goes away once we really have tube VKs in the tree
+// We set this to the max range-check-pass value (as the minimum of 0 is a valid index)
+const VK_TREE_FAKE_INDEX = 4294967295;
+
 export function getVKIndex(vk: VerificationKeyData | VerificationKeyAsFields | Fr) {
   let hash;
   if (vk instanceof VerificationKeyData) {
@@ -158,17 +162,17 @@ export function getVKIndex(vk: VerificationKeyData | VerificationKeyAsFields | F
 
   const index = getVKTree().getIndex(hash.toBuffer());
   // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
-  // however, this blocked merging of a long-running branch so we are neutering this a bit for now
-  // if (index < 0) {
+  if (index < 0) {
+    return VK_TREE_FAKE_INDEX;
     // throw new Error(`VK index for ${hash.toString()} not found in VK tree`);
-  // }
+  }
   return index;
 }
 
 export function getVKSiblingPath(vkIndex: number) {
   // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
   // however, this blocked merging of a long-running branch so we are neutering this a bit for now
-  if (vkIndex < 0) {
+  if (vkIndex === VK_TREE_FAKE_INDEX) {
     return makeTuple(VK_TREE_HEIGHT, () => new Fr(0));
   }
   return assertLength<Fr, typeof VK_TREE_HEIGHT>(
