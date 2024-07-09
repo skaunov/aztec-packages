@@ -50,7 +50,7 @@ This will compile your source code into a Noir build artifact to be stored in th
 
 ```sh
 # Here we pass the path to the newly generated Noir artifact.
-bb write_vk_ultra_honk -b ./target/<noir_artifact_name>.json
+bb write_vk -b ./target/<noir_artifact_name>.json
 bb contract
 ```
 

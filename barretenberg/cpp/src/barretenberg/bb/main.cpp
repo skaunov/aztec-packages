@@ -743,7 +743,7 @@ void gateCount(const std::string& bytecodePath, bool honk_recursion)
 }
 
 /**
- * @brief Verifies a proof for an ACIR circuit
+ * @brief Verifies a proof for an ACIR circuit.
  *
  * Note: The fact that the proof was computed originally by parsing an ACIR circuit is not of importance
  * because this method uses the verification key to verify the proof.
