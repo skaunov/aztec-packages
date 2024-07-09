@@ -157,7 +157,7 @@ export function getVKIndex(vk: VerificationKeyData | VerificationKeyAsFields | F
   }
 
   const index = getVKTree().getIndex(hash.toBuffer());
-  // TODO(#7410) we need the tube VKs in here for this to be valid
+  // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
   // however, this blocked merging of a long-running branch so we are neutering this a bit for now
   // if (index < 0) {
     // throw new Error(`VK index for ${hash.toString()} not found in VK tree`);
@@ -166,7 +166,7 @@ export function getVKIndex(vk: VerificationKeyData | VerificationKeyAsFields | F
 }
 
 export function getVKSiblingPath(vkIndex: number) {
-  // TODO(#7410) we need the tube VKs in here for this to be valid
+  // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
   // however, this blocked merging of a long-running branch so we are neutering this a bit for now
   if (vkIndex < 0) {
     return makeTuple(VK_TREE_HEIGHT, () => new Fr(0));

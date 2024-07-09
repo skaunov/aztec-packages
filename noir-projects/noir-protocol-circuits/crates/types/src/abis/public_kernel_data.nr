@@ -1,4 +1,5 @@
 use crate::constants::VK_TREE_HEIGHT;
+use crate::constants::TUBE_VK_PLACEHOLDER_PATH;
 use crate::abis::kernel_circuit_public_inputs::{PublicKernelCircuitPublicInputs, KernelCircuitPublicInputs};
 use crate::recursion::{proof::NestedRecursiveProof, verification_key::VerificationKey, traits::Verifiable};
 use crate::merkle_tree::membership::assert_check_membership;
@@ -26,7 +27,7 @@ impl Verifiable for PublicKernelData {
 
 impl PublicKernelData {
     fn validate_in_vk_tree<N>(self, allowed_indices: [u32; N]) {
-        // TODO(#7410) we need the tube VKs in here for this to be valid
+        // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
         // We use a special index for now
         if self.vk_path != TUBE_VK_PLACEHOLDER_PATH {
             let index_hint = find_index_hint(allowed_indices, self.vk_index);

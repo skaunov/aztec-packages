@@ -37,7 +37,7 @@ impl Verifiable for RootRollupParityInput {
 
 impl RootRollupParityInput {
     fn validate_in_vk_tree(self) {
-        // TODO(#7410) we need the tube VKs in here for this to be valid
+        // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
         // We use a special index for now
         if self.vk_path != TUBE_VK_PLACEHOLDER_PATH {
             assert_check_membership(

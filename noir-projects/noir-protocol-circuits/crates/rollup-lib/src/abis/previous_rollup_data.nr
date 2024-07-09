@@ -1,6 +1,7 @@
 use crate::abis::base_or_merge_rollup_public_inputs::BaseOrMergeRollupPublicInputs;
 use dep::types::{
     constants::VK_TREE_HEIGHT,
+    constants::TUBE_VK_PLACEHOLDER_PATH,
     recursion::{proof::NestedRecursiveProof, verification_key::VerificationKey, traits::Verifiable},
     traits::Empty, merkle_tree::MembershipWitness, merkle_tree::membership::assert_check_membership,
     utils::arrays::find_index_hint
@@ -38,7 +39,7 @@ impl Empty for PreviousRollupData {
 
 impl PreviousRollupData {
     fn validate_in_vk_tree<N>(self, allowed_indices: [u32; N]) {
-        // TODO(#7410) we need the tube VKs in here for this to be valid
+        // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
         // We use a special index for now
         if self.vk_witness.sibling_path != TUBE_VK_PLACEHOLDER_PATH {
             let index_hint = find_index_hint(allowed_indices, self.vk_witness.leaf_index as u32);
