@@ -33,20 +33,19 @@ void compute_logderivative_inverse(Polynomials& polynomials, auto& relation_para
     auto& inverse_polynomial = Relation::template get_inverse_polynomial(polynomials);
     for (size_t i = 0; i < circuit_size; ++i) {
         // TODO(https://github.com/AztecProtocol/barretenberg/issues/940): avoid get_row if possible.
-        auto row = polynomials.get_row(i);
-        bool has_inverse = Relation::operation_exists_at_row(row);
+        bool has_inverse = Relation::operation_exists_at_row(polynomials, i);
         if (!has_inverse) {
             continue;
         }
         FF denominator = 1;
         bb::constexpr_for<0, READ_TERMS, 1>([&]<size_t read_index> {
             auto denominator_term =
-                Relation::template compute_read_term<Accumulator, read_index>(row, relation_parameters);
+                Relation::template compute_read_term<Accumulator, read_index>(polynomials, i, relation_parameters);
             denominator *= denominator_term;
         });
         bb::constexpr_for<0, WRITE_TERMS, 1>([&]<size_t write_index> {
             auto denominator_term =
-                Relation::template compute_write_term<Accumulator, write_index>(row, relation_parameters);
+                Relation::template compute_write_term<Accumulator, write_index>(polynomials, i, relation_parameters);
             denominator *= denominator_term;
         });
         inverse_polynomial[i] = denominator;

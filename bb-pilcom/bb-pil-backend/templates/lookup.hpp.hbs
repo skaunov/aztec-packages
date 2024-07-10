@@ -18,9 +18,9 @@ class {{lookup_name}}_lookup_settings {
     static constexpr size_t READ_TERM_DEGREE = {{read_term_degree}};
     static constexpr size_t WRITE_TERM_DEGREE = {{write_term_degree}};
 
-    template <typename AllEntities> static inline auto inverse_polynomial_is_computed_at_row(const AllEntities& in)
+    template <typename Polynomials> static inline auto inverse_polynomial_is_computed_at_row(const Polynomials& in, size_t row)
     {
-        return (in.{{lhs_selector}} == 1 || in.{{rhs_selector}} == 1);
+        return (in.{{lhs_selector}}[row] == 1 || in.{{rhs_selector}}[row] == 1);
     }
 
     template <typename Accumulator, typename AllEntities>

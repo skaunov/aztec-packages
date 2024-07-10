@@ -98,7 +98,8 @@ template <typename FF_> class DatabusLookupRelationImpl {
      * @tparam AllValues
      * @param row
      */
-    template <size_t bus_idx, typename AllValues> static bool operation_exists_at_row(const AllValues& row)
+    template <size_t bus_idx, typename AllValues>
+    static bool operation_exists_at_row(const AllValues& row, [[maybe_unused]] size_t i)
     {
         auto read_selector = get_read_selector<FF, bus_idx>(row);
         auto read_counts = BusData<bus_idx, AllValues>::read_counts(row);
@@ -158,6 +159,21 @@ template <typename FF_> class DatabusLookupRelationImpl {
         return value + gamma + id * beta; // degree 1
     }
 
+    template <typename Accumulator, size_t bus_idx, typename AllEntities, typename Parameters>
+    static Accumulator compute_write_term(const AllEntities& in, size_t row, const Parameters& params)
+    {
+        using View = typename Accumulator::View;
+        using ParameterView = GetParameterView<Parameters, View>;
+
+        const auto& id = View(in[row].databus_id);
+        const auto& value = View(BusData<bus_idx, AllEntities>::values(in[row]));
+        const auto& gamma = ParameterView(params.gamma);
+        const auto& beta = ParameterView(params.beta);
+
+        // Construct value_i + idx_i*\beta + \gamma
+        return value + gamma + id * beta; // degree 1
+    }
+
     /**
      * @brief Compute read term denominator in log derivative lookup argument
      * @note No bus_idx required here since inputs to a read are of the same form regardless the bus column
@@ -172,6 +188,22 @@ template <typename FF_> class DatabusLookupRelationImpl {
         // Bus value stored in w_1, index into bus column stored in w_2
         const auto& w_1 = View(in.w_l);
         const auto& w_2 = View(in.w_r);
+        const auto& gamma = ParameterView(params.gamma);
+        const auto& beta = ParameterView(params.beta);
+
+        // Construct value + index*\beta + \gamma
+        return w_1 + gamma + w_2 * beta;
+    }
+
+    template <typename Accumulator, typename AllEntities, typename Parameters>
+    static Accumulator compute_read_term(const AllEntities& in, size_t row, const Parameters& params)
+    {
+        using View = typename Accumulator::View;
+        using ParameterView = GetParameterView<Parameters, View>;
+
+        // Bus value stored in w_1, index into bus column stored in w_2
+        const auto& w_1 = View(in[row].w_l);
+        const auto& w_2 = View(in[row].w_r);
         const auto& gamma = ParameterView(params.gamma);
         const auto& beta = ParameterView(params.beta);
 

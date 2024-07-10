@@ -18,9 +18,10 @@ class lookup_byte_lengths_lookup_settings {
     static constexpr size_t READ_TERM_DEGREE = 0;
     static constexpr size_t WRITE_TERM_DEGREE = 0;
 
-    template <typename AllEntities> static inline auto inverse_polynomial_is_computed_at_row(const AllEntities& in)
+    template <typename Polynomials>
+    static inline auto inverse_polynomial_is_computed_at_row(const Polynomials& in, size_t row)
     {
-        return (in.binary_start == 1 || in.byte_lookup_sel_bin == 1);
+        return (in.binary_start[row] == 1 || in.byte_lookup_sel_bin[row] == 1);
     }
 
     template <typename Accumulator, typename AllEntities>

@@ -48,10 +48,10 @@ template <typename FF_> class LogDerivLookupRelationImpl {
      * has been utlized in the circuit).
      *
      */
-    template <typename AllValues> static bool operation_exists_at_row(const AllValues& row)
+    template <typename Polynomials> static bool operation_exists_at_row(const Polynomials& in, size_t row)
     {
         // is the row a lookup gate or does it contain table data that has been read at some point in this circuit
-        return (row.q_lookup == 1) || (row.lookup_read_tags == 1);
+        return (in.q_lookup[row] == 1) || (in.lookup_read_tags[row] == 1);
     }
 
     // Get the inverse polynomial for this relation
@@ -97,6 +97,28 @@ template <typename FF_> class LogDerivLookupRelationImpl {
         return table_1 + gamma + table_2 * eta + table_3 * eta_two + table_4 * eta_three;
     }
 
+    // Compute table_1 + gamma + table_2 * eta + table_3 * eta_2 + table_4 * eta_3
+    template <typename Accumulator, size_t write_index, typename AllEntities, typename Parameters>
+    static Accumulator compute_write_term(const AllEntities& in, size_t row, const Parameters& params)
+    {
+        using View = typename Accumulator::View;
+        using ParameterView = GetParameterView<Parameters, View>;
+
+        static_assert(write_index < WRITE_TERMS);
+
+        const auto& gamma = ParameterView(params.gamma);
+        const auto& eta = ParameterView(params.eta);
+        const auto& eta_two = ParameterView(params.eta_two);
+        const auto& eta_three = ParameterView(params.eta_three);
+
+        auto table_1 = View(in.table_1[row]);
+        auto table_2 = View(in.table_2[row]);
+        auto table_3 = View(in.table_3[row]);
+        auto table_4 = View(in.table_4[row]);
+
+        return table_1 + gamma + table_2 * eta + table_3 * eta_two + table_4 * eta_three;
+    }
+
     template <typename Accumulator, size_t read_index, typename AllEntities, typename Parameters>
     static Accumulator compute_read_term(const AllEntities& in, const Parameters& params)
     {
@@ -120,6 +142,43 @@ template <typename FF_> class LogDerivLookupRelationImpl {
         auto negative_column_1_step_size = View(in.q_r);
         auto negative_column_2_step_size = View(in.q_m);
         auto negative_column_3_step_size = View(in.q_c);
+
+        // The wire values for lookup gates are accumulators structured in such a way that the differences w_i -
+        // step_size*w_i_shift result in values present in column i of a corresponding table. See the documentation in
+        // method get_lookup_accumulators() in  for a detailed explanation.
+        auto derived_table_entry_1 = w_1 + gamma + negative_column_1_step_size * w_1_shift;
+        auto derived_table_entry_2 = w_2 + negative_column_2_step_size * w_2_shift;
+        auto derived_table_entry_3 = w_3 + negative_column_3_step_size * w_3_shift;
+
+        // (w_1 + q_2*w_1_shift) + η(w_2 + q_m*w_2_shift) + η₂(w_3 + q_c*w_3_shift) + η₃q_index.
+        // deg 2 or 3
+        return derived_table_entry_1 + derived_table_entry_2 * eta + derived_table_entry_3 * eta_two +
+               table_index * eta_three;
+    }
+
+    template <typename Accumulator, size_t read_index, typename AllEntities, typename Parameters>
+    static Accumulator compute_read_term(const AllEntities& in, size_t row, const Parameters& params)
+    {
+        using View = typename Accumulator::View;
+        using ParameterView = GetParameterView<Parameters, View>;
+
+        const auto& gamma = ParameterView(params.gamma);
+        const auto& eta = ParameterView(params.eta);
+        const auto& eta_two = ParameterView(params.eta_two);
+        const auto& eta_three = ParameterView(params.eta_three);
+
+        auto w_1 = View(in.w_l[row]);
+        auto w_2 = View(in.w_r[row]);
+        auto w_3 = View(in.w_o[row]);
+
+        auto w_1_shift = View(in.w_l_shift[row]);
+        auto w_2_shift = View(in.w_r_shift[row]);
+        auto w_3_shift = View(in.w_o_shift[row]);
+
+        auto table_index = View(in.q_o[row]);
+        auto negative_column_1_step_size = View(in.q_r[row]);
+        auto negative_column_2_step_size = View(in.q_m[row]);
+        auto negative_column_3_step_size = View(in.q_c[row]);
 
         // The wire values for lookup gates are accumulators structured in such a way that the differences w_i -
         // step_size*w_i_shift result in values present in column i of a corresponding table. See the documentation in

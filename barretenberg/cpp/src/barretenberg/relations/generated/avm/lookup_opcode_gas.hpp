@@ -18,9 +18,10 @@ class lookup_opcode_gas_lookup_settings {
     static constexpr size_t READ_TERM_DEGREE = 0;
     static constexpr size_t WRITE_TERM_DEGREE = 0;
 
-    template <typename AllEntities> static inline auto inverse_polynomial_is_computed_at_row(const AllEntities& in)
+    template <typename Polynomials>
+    static inline auto inverse_polynomial_is_computed_at_row(const Polynomials& in, size_t row)
     {
-        return (in.main_sel_gas_accounting_active == 1 || in.gas_sel_gas_cost == 1);
+        return (in.main_sel_gas_accounting_active[row] == 1 || in.gas_sel_gas_cost[row] == 1);
     }
 
     template <typename Accumulator, typename AllEntities>

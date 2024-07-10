@@ -18,9 +18,10 @@ class lookup_u16_6_lookup_settings {
     static constexpr size_t READ_TERM_DEGREE = 0;
     static constexpr size_t WRITE_TERM_DEGREE = 0;
 
-    template <typename AllEntities> static inline auto inverse_polynomial_is_computed_at_row(const AllEntities& in)
+    template <typename Polynomials>
+    static inline auto inverse_polynomial_is_computed_at_row(const Polynomials& in, size_t row)
     {
-        return (in.alu_sel_rng_chk_lookup == 1 || in.main_sel_rng_16 == 1);
+        return (in.alu_sel_rng_chk_lookup[row] == 1 || in.main_sel_rng_16[row] == 1);
     }
 
     template <typename Accumulator, typename AllEntities>

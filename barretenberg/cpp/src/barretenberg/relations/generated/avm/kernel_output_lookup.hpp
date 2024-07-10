@@ -18,9 +18,11 @@ class kernel_output_lookup_lookup_settings {
     static constexpr size_t READ_TERM_DEGREE = 0;
     static constexpr size_t WRITE_TERM_DEGREE = 0;
 
-    template <typename AllEntities> static inline auto inverse_polynomial_is_computed_at_row(const AllEntities& in)
+    template <typename Polynomials>
+    static inline auto inverse_polynomial_is_computed_at_row(const Polynomials& in, size_t row)
     {
-        return (in.main_sel_q_kernel_output_lookup == 1 || in.kernel_q_public_input_kernel_out_add_to_table == 1);
+        return (in.main_sel_q_kernel_output_lookup[row] == 1 ||
+                in.kernel_q_public_input_kernel_out_add_to_table[row] == 1);
     }
 
     template <typename Accumulator, typename AllEntities>

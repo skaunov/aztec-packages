@@ -212,10 +212,9 @@ template <typename Settings, typename FF_> class GenericLookupRelationImpl {
      *
      * @param row All values at row
      */
-    template <typename AllValues> static bool operation_exists_at_row(const AllValues& row)
-
+    template <typename Polynomials> static bool operation_exists_at_row(const Polynomials& polys, size_t row)
     {
-        return Settings::inverse_polynomial_is_computed_at_row(row);
+        return Settings::inverse_polynomial_is_computed_at_row(polys, row);
     }
 
     /**
@@ -365,6 +364,81 @@ template <typename Settings, typename FF_> class GenericLookupRelationImpl {
         return SIZE_MAX;
     }
 
+    template <typename Accumulator, size_t read_index, typename AllEntities, typename Parameters>
+    static Accumulator compute_read_term(const AllEntities& in, const Parameters& params)
+    {
+        return compute_read_term_internal<Accumulator, read_index, false, AllEntities, Parameters>(in, 0, params);
+        // using View = typename Accumulator::View;
+
+        // static_assert(read_index < READ_TERMS);
+        // constexpr size_t start_polynomial_index = compute_read_term_polynomial_offset(read_index);
+        // if constexpr (Settings::READ_TERM_TYPES[read_index] == READ_BASIC_TUPLE) {
+        //     // Retrieve all polynomials used
+        //     const auto all_polynomials = Settings::get_const_entities(in);
+
+        //     auto result = Accumulator(0);
+
+        //     // Iterate over tuple and sum as a polynomial over beta
+        //     bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>(
+        //         [&]<size_t i>() { result = (result * params.beta) + View(std::get<i>(all_polynomials)); });
+        //     const auto& gamma = params.gamma;
+        //     return result + gamma;
+        // } else if constexpr (Settings::READ_TERM_TYPES[read_index] == READ_SCALED_TUPLE) {
+        //     // Retrieve all polynomials used
+        //     const auto all_polynomials = Settings::get_const_entities(in);
+
+        //     auto result = Accumulator(0);
+        //     // Iterate over tuple and sum as a polynomial over beta
+        //     bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>([&]<size_t i>()
+        //     {
+        //         result = (result * params.beta) + View(std::get<i + 2 * LOOKUP_TUPLE_SIZE>(all_polynomials)) -
+        //                  View(std::get<i + LOOKUP_TUPLE_SIZE>(all_polynomials)) * View(std::get<i>(all_polynomials));
+        //     });
+        //     const auto& gamma = params.gamma;
+        //     return result + gamma;
+        // } else {
+        //     return Settings::template compute_read_term<Accumulator, read_index>(in, params);
+        // }
+    }
+
+    template <typename Accumulator, size_t read_index, typename AllEntities, typename Parameters>
+    static Accumulator compute_read_term(const AllEntities& in, size_t row, const Parameters& params)
+    {
+        return compute_read_term_internal<Accumulator, read_index, true, AllEntities, Parameters>(in, row, params);
+        // using View = typename Accumulator::View;
+
+        // static_assert(read_index < READ_TERMS);
+        // constexpr size_t start_polynomial_index = compute_read_term_polynomial_offset(read_index);
+        // if constexpr (Settings::READ_TERM_TYPES[read_index] == READ_BASIC_TUPLE) {
+        //     // Retrieve all polynomials used
+        //     const auto all_polynomials = Settings::get_const_entities(in);
+
+        //     auto result = Accumulator(0);
+
+        //     // Iterate over tuple and sum as a polynomial over beta
+        //     bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>(
+        //         [&]<size_t i>() { result = (result * params.beta) + View(std::get<i>(all_polynomials)[row]); });
+        //     const auto& gamma = params.gamma;
+        //     return result + gamma;
+        // } else if constexpr (Settings::READ_TERM_TYPES[read_index] == READ_SCALED_TUPLE) {
+        //     // Retrieve all polynomials used
+        //     const auto all_polynomials = Settings::get_const_entities(in);
+
+        //     auto result = Accumulator(0);
+        //     // Iterate over tuple and sum as a polynomial over beta
+        //     bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>([&]<size_t i>()
+        //     {
+        //         result = (result * params.beta) + View(std::get<i + 2 * LOOKUP_TUPLE_SIZE>(all_polynomials)[row]) -
+        //                  View(std::get<i + LOOKUP_TUPLE_SIZE>(all_polynomials)[row]) *
+        //                      View(std::get<i>(all_polynomials)[row]);
+        //     });
+        //     const auto& gamma = params.gamma;
+        //     return result + gamma;
+        // } else {
+        //     return Settings::template compute_read_term<Accumulator, read_index>(in, row, params);
+        // }
+    }
+
     /**
      * @brief Compute the value of a single item in the set
      *
@@ -375,8 +449,8 @@ template <typename Settings, typename FF_> class GenericLookupRelationImpl {
      *
      * @param params Used for beta and gamma
      */
-    template <typename Accumulator, size_t read_index, typename AllEntities, typename Parameters>
-    static Accumulator compute_read_term(const AllEntities& in, const Parameters& params)
+    template <typename Accumulator, size_t read_index, bool read_row, typename AllEntities, typename Parameters>
+    static inline Accumulator compute_read_term_internal(const AllEntities& in, size_t row, const Parameters& params)
     {
         using View = typename Accumulator::View;
 
@@ -389,8 +463,13 @@ template <typename Settings, typename FF_> class GenericLookupRelationImpl {
             auto result = Accumulator(0);
 
             // Iterate over tuple and sum as a polynomial over beta
-            bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>(
-                [&]<size_t i>() { result = (result * params.beta) + View(std::get<i>(all_polynomials)); });
+            bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>([&]<size_t i>() {
+                if constexpr (read_row) {
+                    result = (result * params.beta) + View(std::get<i>(all_polynomials)[row]);
+                } else {
+                    result = (result * params.beta) + View(std::get<i>(all_polynomials));
+                }
+            });
             const auto& gamma = params.gamma;
             return result + gamma;
         } else if constexpr (Settings::READ_TERM_TYPES[read_index] == READ_SCALED_TUPLE) {
@@ -400,15 +479,75 @@ template <typename Settings, typename FF_> class GenericLookupRelationImpl {
             auto result = Accumulator(0);
             // Iterate over tuple and sum as a polynomial over beta
             bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>([&]<size_t i>() {
-                result = (result * params.beta) + View(std::get<i + 2 * LOOKUP_TUPLE_SIZE>(all_polynomials)) -
-                         View(std::get<i + LOOKUP_TUPLE_SIZE>(all_polynomials)) * View(std::get<i>(all_polynomials));
+                if constexpr (read_row) {
+                    result = (result * params.beta) + View(std::get<i + 2 * LOOKUP_TUPLE_SIZE>(all_polynomials)[row]) -
+                             View(std::get<i + LOOKUP_TUPLE_SIZE>(all_polynomials)[row]) *
+                                 View(std::get<i>(all_polynomials)[row]);
+                } else {
+                    result =
+                        (result * params.beta) + View(std::get<i + 2 * LOOKUP_TUPLE_SIZE>(all_polynomials)) -
+                        View(std::get<i + LOOKUP_TUPLE_SIZE>(all_polynomials)) * View(std::get<i>(all_polynomials));
+                }
             });
             const auto& gamma = params.gamma;
             return result + gamma;
         } else {
-
-            return Settings::template compute_read_term<Accumulator, read_index>(in, params);
+            return Settings::template compute_read_term_internal<Accumulator, read_index, read_row>(in, row, params);
         }
+    }
+
+    template <typename Accumulator, size_t write_index, typename AllEntities, typename Parameters>
+    static Accumulator compute_write_term(const AllEntities& in, const Parameters& params)
+    {
+        return compute_write_term_internal<Accumulator, write_index, false, AllEntities, Parameters>(in, 0, params);
+        // static_assert(write_index < WRITE_TERMS);
+
+        // using View = typename Accumulator::View;
+        // constexpr size_t start_polynomial_index = compute_write_term_polynomial_offset(write_index);
+
+        // if constexpr (Settings::WRITE_TERM_TYPES[write_index] == WRITE_BASIC_TUPLE) {
+        //     // Retrieve all polynomials used
+        //     const auto all_polynomials = Settings::get_const_entities(in);
+
+        //     auto result = Accumulator(0);
+
+        //     // Iterate over tuple and sum as a polynomial over beta
+        //     bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>(
+        //         [&]<size_t i>() { result = (result * params.beta) + View(std::get<i>(all_polynomials)); });
+        //     const auto& gamma = params.gamma;
+        //     return result + gamma;
+        // } else {
+        //     // Sometimes we construct lookup tables on the fly from intermediate
+
+        //     return Settings::template compute_write_term<Accumulator, write_index>(in, params);
+        // }
+    }
+
+    template <typename Accumulator, size_t write_index, typename AllEntities, typename Parameters>
+    static Accumulator compute_write_term(const AllEntities& in, size_t row, const Parameters& params)
+    {
+        return compute_write_term_internal<Accumulator, write_index, true, AllEntities, Parameters>(in, row, params);
+        // static_assert(write_index < WRITE_TERMS);
+
+        // using View = typename Accumulator::View;
+        // constexpr size_t start_polynomial_index = compute_write_term_polynomial_offset(write_index);
+
+        // if constexpr (Settings::WRITE_TERM_TYPES[write_index] == WRITE_BASIC_TUPLE) {
+        //     // Retrieve all polynomials used
+        //     const auto all_polynomials = Settings::get_const_entities(in);
+
+        //     auto result = Accumulator(0);
+
+        //     // Iterate over tuple and sum as a polynomial over beta
+        //     bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>(
+        //         [&]<size_t i>() { result = (result * params.beta) + View(std::get<i>(all_polynomials)[row]); });
+        //     const auto& gamma = params.gamma;
+        //     return result + gamma;
+        // } else {
+        //     // Sometimes we construct lookup tables on the fly from intermediate
+
+        //     return Settings::template compute_write_term<Accumulator, write_index>(in, row, params);
+        // }
     }
 
     /**
@@ -421,10 +560,9 @@ template <typename Settings, typename FF_> class GenericLookupRelationImpl {
      *
      * @param params Used for beta and gamma
      */
-    template <typename Accumulator, size_t write_index, typename AllEntities, typename Parameters>
-    static Accumulator compute_write_term(const AllEntities& in, const Parameters& params)
+    template <typename Accumulator, size_t write_index, bool read_row, typename AllEntities, typename Parameters>
+    static inline Accumulator compute_write_term_internal(const AllEntities& in, size_t row, const Parameters& params)
     {
-
         static_assert(write_index < WRITE_TERMS);
 
         using View = typename Accumulator::View;
@@ -437,14 +575,18 @@ template <typename Settings, typename FF_> class GenericLookupRelationImpl {
             auto result = Accumulator(0);
 
             // Iterate over tuple and sum as a polynomial over beta
-            bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>(
-                [&]<size_t i>() { result = (result * params.beta) + View(std::get<i>(all_polynomials)); });
+            bb::constexpr_for<start_polynomial_index, start_polynomial_index + LOOKUP_TUPLE_SIZE, 1>([&]<size_t i>() {
+                if constexpr (read_row) {
+                    result = (result * params.beta) + View(std::get<i>(all_polynomials)[row]);
+                } else {
+                    result = (result * params.beta) + View(std::get<i>(all_polynomials));
+                }
+            });
             const auto& gamma = params.gamma;
             return result + gamma;
         } else {
             // Sometimes we construct lookup tables on the fly from intermediate
-
-            return Settings::template compute_write_term<Accumulator, write_index>(in, params);
+            return Settings::template compute_write_term_internal<Accumulator, write_index, read_row>(in, row, params);
         }
     }
 

@@ -12,9 +12,10 @@ class perm_main_mem_d_permutation_settings {
     // This constant defines how many columns are bundled together to form each set.
     constexpr static size_t COLUMNS_PER_SET = 8;
 
-    template <typename AllEntities> static inline auto inverse_polynomial_is_computed_at_row(const AllEntities& in)
+    template <typename Polynomials>
+    static inline auto inverse_polynomial_is_computed_at_row(const Polynomials& in, size_t row)
     {
-        return (in.main_sel_mem_op_d == 1 || in.mem_sel_op_d == 1);
+        return (in.main_sel_mem_op_d[row] == 1 || in.mem_sel_op_d[row] == 1);
     }
 
     template <typename AllEntities> static inline auto get_const_entities(const AllEntities& in)
