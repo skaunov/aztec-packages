@@ -4,10 +4,10 @@ use dep::types::abis::{
     public_kernel_data::PublicKernelData, public_call_data::PublicCallData
 };
 use dep::types::utils::arrays::array_to_bounded_vec;
-use dep::types::constants::{PRIVATE_KERNEL_TAIL_TO_PUBLIC_INDEX, PUBLIC_KERNEL_SETUP_INDEX};
+use dep::types::constants::{TUBE_VK_PUBLIC_INDEX, PUBLIC_KERNEL_SETUP_INDEX};
 
 global ALLOWED_PREVIOUS_CIRCUITS = [
-    PRIVATE_KERNEL_TAIL_TO_PUBLIC_INDEX,
+    TUBE_VK_PUBLIC_INDEX,
     PUBLIC_KERNEL_SETUP_INDEX,
 ];
 

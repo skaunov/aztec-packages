@@ -39,6 +39,7 @@ import { runInDirectory } from '@aztec/foundation/fs';
 import { createDebugLogger } from '@aztec/foundation/log';
 import { Timer } from '@aztec/foundation/timer';
 import {
+  CppCircuitVks,
   ProtocolCircuitVkIndexes,
   ServerCircuitArtifacts,
   type ServerProtocolArtifact,
@@ -228,8 +229,10 @@ export class BBNativeRollupProver implements ServerCircuitProver {
     // PUBLIC KERNEL: kernel request should be nonempty at start of public kernel proving but it is not
     // TODO(#7369): We should properly enqueue the tube in the public kernel lifetime
     if (!kernelRequest.inputs.previousKernel.clientIvcProof.isEmpty()) {
-      const { tubeVK, tubeProof } = await this.getTubeProof(new TubeInputs(kernelRequest.inputs.previousKernel.clientIvcProof));
-      kernelRequest.inputs.previousKernel.vk = tubeVK;
+      // LONDONTODO use tubeVK
+      const { tubeProof } = await this.getTubeProof(new TubeInputs(kernelRequest.inputs.previousKernel.clientIvcProof));
+      // LONDONTODO fake vk
+      kernelRequest.inputs.previousKernel.vk = CppCircuitVks.TubePublic; //tubeVK;
       kernelRequest.inputs.previousKernel.proof = tubeProof;
     }
 

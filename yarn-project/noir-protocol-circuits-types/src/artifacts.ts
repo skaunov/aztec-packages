@@ -85,6 +85,12 @@ export const ServerCircuitArtifacts: Record<ServerProtocolArtifact, NoirCompiled
   RootRollupArtifact: RootRollupJson as NoirCompiledCircuit,
 };
 
+// these circuits break the pattern by not having noir
+// prove_tube is entirely in C++ for example
+export type CppCircuitArtifact =
+  | 'TubePublic'
+  | 'TubeRollup';
+
 export const SimulatedServerCircuitArtifacts: Record<ServerProtocolArtifact, NoirCompiledCircuit> = {
   EmptyNestedArtifact: EmptyNestedSimulatedJson as NoirCompiledCircuit,
   PrivateKernelEmptyArtifact: PrivateKernelEmptySimulatedJson as NoirCompiledCircuit,

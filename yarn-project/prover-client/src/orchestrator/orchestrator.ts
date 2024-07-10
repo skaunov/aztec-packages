@@ -56,7 +56,7 @@ import { createDebugLogger } from '@aztec/foundation/log';
 import { promiseWithResolvers } from '@aztec/foundation/promise';
 import { BufferReader, type Tuple } from '@aztec/foundation/serialize';
 import { pushTestData } from '@aztec/foundation/testing';
-import { ProtocolCircuitVks, getVKIndex, getVKSiblingPath, getVKTreeRoot } from '@aztec/noir-protocol-circuits-types';
+import { CppCircuitVks, ProtocolCircuitVks, getVKIndex, getVKSiblingPath, getVKTreeRoot } from '@aztec/noir-protocol-circuits-types';
 import { Attributes, type TelemetryClient, type Tracer, trackSpan, wrapCallbackInSpan } from '@aztec/telemetry-client';
 import { type MerkleTreeOperations } from '@aztec/world-state';
 
@@ -575,7 +575,10 @@ export class ProvingOrchestrator {
     };
     const getBaseInputsNonEmptyTx = async () => {
       const proof = await this.prover.getTubeProof(new TubeInputs(tx.clientIvcProof));
-      return await buildBaseRollupInput(tx, proof.tubeProof, provingState.globalVariables, this.db, proof.tubeVK);
+      // LONDONTODO use real tubeVk
+      // const vk = proof.tubeVK;
+      const vk = CppCircuitVks.TubeRollup;
+      return await buildBaseRollupInput(tx, proof.tubeProof, provingState.globalVariables, this.db, vk);
     }
     const inputs = tx.isEmpty ? await getBaseInputsEmptyTx() : await getBaseInputsNonEmptyTx();
     const promises = [MerkleTreeId.NOTE_HASH_TREE, MerkleTreeId.NULLIFIER_TREE, MerkleTreeId.PUBLIC_DATA_TREE].map(

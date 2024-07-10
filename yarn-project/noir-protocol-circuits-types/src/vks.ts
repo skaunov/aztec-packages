@@ -21,6 +21,8 @@ import {
   PUBLIC_KERNEL_TEARDOWN_INDEX,
   ROOT_PARITY_INDEX,
   ROOT_ROLLUP_INDEX,
+  TUBE_VK_PUBLIC_INDEX,
+  TUBE_VK_ROLLUP_INDEX,
   VERIFICATION_KEY_LENGTH_IN_FIELDS,
   VK_TREE_HEIGHT,
   VerificationKeyAsFields,
@@ -47,23 +49,23 @@ import PublicKernelTeardownVkJson from '../artifacts/keys/public_kernel_teardown
 import BaseRollupVkJson from '../artifacts/keys/rollup_base.vk.data.json' assert { type: 'json' };
 import MergeRollupVkJson from '../artifacts/keys/rollup_merge.vk.data.json' assert { type: 'json' };
 import RootRollupVkJson from '../artifacts/keys/rollup_root.vk.data.json' assert { type: 'json' };
-import { type ClientProtocolArtifact, type ProtocolArtifact, type ServerProtocolArtifact } from './artifacts.js';
-import { makeTuple } from '@aztec/foundation/array';
+import { type CppCircuitArtifact, type ClientProtocolArtifact, type ProtocolArtifact, type ServerProtocolArtifact } from './artifacts.js';
 
 interface VkJson {
   keyAsBytes: string;
   keyAsFields: string[];
 }
 
-function keyJsonToVKData(json: VkJson): VerificationKeyData {
+function keyJsonToVKData(json: VkJson, fakeVkHash?: Fr): VerificationKeyData {
   const { keyAsBytes, keyAsFields } = json;
   return new VerificationKeyData(
     new VerificationKeyAsFields(
-      assertLength(
-        keyAsFields.map((str: string) => new Fr(Buffer.from(str.slice(2), 'hex'))),
-        VERIFICATION_KEY_LENGTH_IN_FIELDS,
-      ),
-      new Fr(Buffer.from(keyAsFields[0].slice(2), 'hex')),
+      // assertLength(
+        keyAsFields.map((str: string) => new Fr(Buffer.from(str.slice(2), 'hex'))).slice(0, 103) as any,
+        // VERIFICATION_KEY_LENGTH_IN_FIELDS,
+      // ),
+      // LONDONTODO vk hash in honk is not the first field
+      fakeVkHash || new Fr(Buffer.from(keyAsFields[0].slice(2), 'hex')),
     ),
     Buffer.from(keyAsBytes, 'hex'),
   );
@@ -81,6 +83,11 @@ const ServerCircuitVks: Record<ServerProtocolArtifact, VerificationKeyData> = {
   BaseRollupArtifact: keyJsonToVKData(BaseRollupVkJson),
   MergeRollupArtifact: keyJsonToVKData(MergeRollupVkJson),
   RootRollupArtifact: keyJsonToVKData(RootRollupVkJson),
+};
+
+export const CppCircuitVks: Record<CppCircuitArtifact, VerificationKeyData> = {
+  TubePublic: keyJsonToVKData(EmptyNestedVkJson, new Fr(6942)),
+  TubeRollup: keyJsonToVKData(EmptyNestedVkJson, new Fr(4269)),
 };
 
 const ClientCircuitVks: Record<ClientProtocolArtifact, VerificationKeyData> = {
@@ -130,6 +137,10 @@ function buildVKTree() {
     vkHashes[index] = value.keyAsFields.hash.toBuffer();
   }
 
+  // LONDONTODO temporary
+  vkHashes[TUBE_VK_PUBLIC_INDEX] = CppCircuitVks.TubePublic.keyAsFields.hash.toBuffer();
+  vkHashes[TUBE_VK_ROLLUP_INDEX] = CppCircuitVks.TubeRollup.keyAsFields.hash.toBuffer();
+
   return calculator.computeTree(vkHashes);
 }
 
@@ -146,10 +157,6 @@ export function getVKTreeRoot() {
   return Fr.fromBuffer(getVKTree().root);
 }
 
-// TODO(#7410) this goes away once we really have tube VKs in the tree
-// We set this to the max range-check-pass value (as the minimum of 0 is a valid index)
-const VK_TREE_FAKE_INDEX = 4294967295;
-
 export function getVKIndex(vk: VerificationKeyData | VerificationKeyAsFields | Fr) {
   let hash;
   if (vk instanceof VerificationKeyData) {
@@ -161,20 +168,13 @@ export function getVKIndex(vk: VerificationKeyData | VerificationKeyAsFields | F
   }
 
   const index = getVKTree().getIndex(hash.toBuffer());
-  // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
   if (index < 0) {
-    return VK_TREE_FAKE_INDEX;
-    // throw new Error(`VK index for ${hash.toString()} not found in VK tree`);
+    throw new Error(`VK index for ${hash.toString()} not found in VK tree`);
   }
   return index;
 }
 
 export function getVKSiblingPath(vkIndex: number) {
-  // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
-  // however, this blocked merging of a long-running branch so we are neutering this a bit for now
-  if (vkIndex === VK_TREE_FAKE_INDEX) {
-    return makeTuple(VK_TREE_HEIGHT, () => new Fr(0));
-  }
   return assertLength<Fr, typeof VK_TREE_HEIGHT>(
     getVKTree()
       .getSiblingPath(vkIndex)

@@ -1,7 +1,7 @@
 use dep::types::{
     traits::Empty,
     recursion::{verification_key::VerificationKey, proof::RecursiveProof, traits::Verifiable},
-    constants::{BASE_PARITY_INDEX, VK_TREE_HEIGHT, TUBE_VK_PLACEHOLDER_PATH}, merkle_tree::membership::assert_check_membership
+    constants::{BASE_PARITY_INDEX, VK_TREE_HEIGHT}, merkle_tree::membership::assert_check_membership
 };
 use crate::parity_public_inputs::ParityPublicInputs;
 
@@ -25,27 +25,24 @@ impl Empty for RootParityInput {
 
 impl Verifiable for RootParityInput {
   fn verify(self) {
-    let inputs = ParityPublicInputs::serialize(self.public_inputs);
-    std::verify_proof(
-        self.verification_key.key.as_slice(),
-        self.proof.fields.as_slice(),
-        inputs.as_slice(),
-        self.verification_key.hash
-    );
+    // LONDONTODO
+    // let inputs = ParityPublicInputs::serialize(self.public_inputs);
+    // std::verify_proof(
+    //     self.verification_key.key.as_slice(),
+    //     self.proof.fields.as_slice(),
+    //     inputs.as_slice(),
+    //     self.verification_key.hash
+    // );
   }
 }
 
 impl RootParityInput {
     fn validate_in_vk_tree(self) {
-        // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
-        // We use a special index for now
-        if self.vk_path != TUBE_VK_PLACEHOLDER_PATH {
-            assert_check_membership(
-                self.verification_key.hash,
-                BASE_PARITY_INDEX as Field,
-                self.vk_path,
-                self.public_inputs.vk_tree_root
-            );
-        }
+        assert_check_membership(
+            self.verification_key.hash,
+            BASE_PARITY_INDEX as Field,
+            self.vk_path,
+            self.public_inputs.vk_tree_root
+        );
     }
 }

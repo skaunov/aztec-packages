@@ -76,6 +76,8 @@ library Constants {
   uint256 internal constant PRIVATE_KERNEL_RESET_BIG_INDEX = 3;
   uint256 internal constant PRIVATE_KERNEL_RESET_MEDIUM_INDEX = 4;
   uint256 internal constant PRIVATE_KERNEL_RESET_SMALL_INDEX = 5;
+  uint256 internal constant TUBE_VK_PUBLIC_INDEX = 8;
+  uint256 internal constant TUBE_VK_ROLLUP_INDEX = 9;
   uint256 internal constant PRIVATE_KERNEL_TAIL_INDEX = 10;
   uint256 internal constant PRIVATE_KERNEL_TAIL_TO_PUBLIC_INDEX = 11;
   uint256 internal constant EMPTY_NESTED_INDEX = 12;

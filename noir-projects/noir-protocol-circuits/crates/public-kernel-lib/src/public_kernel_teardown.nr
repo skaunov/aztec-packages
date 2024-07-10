@@ -6,7 +6,7 @@ use dep::types::abis::{
 use dep::types::utils::arrays::array_to_bounded_vec;
 use dep::types::constants::{
     PUBLIC_KERNEL_SETUP_INDEX, PUBLIC_KERNEL_APP_LOGIC_INDEX, PUBLIC_KERNEL_TEARDOWN_INDEX,
-    PRIVATE_KERNEL_TAIL_TO_PUBLIC_INDEX
+    TUBE_VK_PUBLIC_INDEX
 };
 
 struct PublicKernelTeardownCircuitPrivateInputs {
@@ -15,7 +15,7 @@ struct PublicKernelTeardownCircuitPrivateInputs {
 }
 
 global ALLOWED_PREVIOUS_CIRCUITS = [
-    PRIVATE_KERNEL_TAIL_TO_PUBLIC_INDEX,
+    TUBE_VK_PUBLIC_INDEX,
     PUBLIC_KERNEL_SETUP_INDEX,
     PUBLIC_KERNEL_APP_LOGIC_INDEX,
     PUBLIC_KERNEL_TEARDOWN_INDEX,

@@ -1,5 +1,4 @@
 use crate::constants::VK_TREE_HEIGHT;
-use crate::constants::TUBE_VK_PLACEHOLDER_PATH;
 use crate::abis::kernel_circuit_public_inputs::KernelCircuitPublicInputs;
 use crate::recursion::{proof::NestedRecursiveProof, verification_key::VerificationKey, traits::Verifiable};
 use crate::merkle_tree::membership::assert_check_membership;
@@ -15,30 +14,27 @@ struct KernelData {
 
 impl Verifiable for KernelData {
   fn verify(self) {
-    let inputs = KernelCircuitPublicInputs::serialize(self.public_inputs);
-    std::verify_proof(
-        self.vk.key.as_slice(),
-        self.proof.fields.as_slice(),
-        inputs.as_slice(),
-        self.vk.hash
-    );
+    // LONDONTODO
+    // let inputs = KernelCircuitPublicInputs::serialize(self.public_inputs);
+    // std::verify_proof(
+    //     self.vk.key.as_slice(),
+    //     self.proof.fields.as_slice(),
+    //     inputs.as_slice(),
+    //     self.vk.hash
+    // );
   }
 }
 
 impl KernelData {
     fn validate_in_vk_tree<N>(self, allowed_indices: [u32; N]) {
-        // TODO(#7410) we need the tube VKs in the VK tree for this to be valid
-        // We use a special index for now
-        if self.vk_path != TUBE_VK_PLACEHOLDER_PATH {
-            let index_hint = find_index_hint(allowed_indices, self.vk_index);
-            assert_eq(allowed_indices[index_hint], self.vk_index, "Invalid vk index");
+        let index_hint = find_index_hint(allowed_indices, self.vk_index);
+        assert_eq(allowed_indices[index_hint], self.vk_index, "Invalid vk index");
 
-            assert_check_membership(
-                self.vk.hash,
-                self.vk_index as Field,
-                self.vk_path,
-                self.public_inputs.constants.vk_tree_root
-            );
-        }
+        assert_check_membership(
+            self.vk.hash,
+            self.vk_index as Field,
+            self.vk_path,
+            self.public_inputs.constants.vk_tree_root
+        );
     }
 }

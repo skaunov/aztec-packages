@@ -3,11 +3,11 @@ use dep::types::abis::public_kernel_data::PublicKernelData;
 use dep::types::PublicKernelCircuitPublicInputs;
 use dep::types::abis::kernel_circuit_public_inputs::PublicKernelCircuitPublicInputsBuilder;
 use dep::types::utils::arrays::array_to_bounded_vec;
-use dep::types::constants::{PUBLIC_KERNEL_SETUP_INDEX, PUBLIC_KERNEL_APP_LOGIC_INDEX, PRIVATE_KERNEL_TAIL_TO_PUBLIC_INDEX};
+use dep::types::constants::{PUBLIC_KERNEL_SETUP_INDEX, PUBLIC_KERNEL_APP_LOGIC_INDEX, TUBE_VK_PUBLIC_INDEX};
 use crate::common;
 
 global ALLOWED_PREVIOUS_CIRCUITS = [
-    PRIVATE_KERNEL_TAIL_TO_PUBLIC_INDEX,
+    TUBE_VK_PUBLIC_INDEX,
     PUBLIC_KERNEL_SETUP_INDEX,
     PUBLIC_KERNEL_APP_LOGIC_INDEX,
 ];
