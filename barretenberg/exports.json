@@ -419,6 +419,22 @@
     "isAsync": false
   },
   {
+    "functionName": "keccak_f1600",
+    "inArgs": [
+      {
+        "name": "in_state",
+        "type": "const uint8_t *"
+      }
+    ],
+    "outArgs": [
+      {
+        "name": "out_state",
+        "type": "uint8_t **"
+      }
+    ],
+    "isAsync": false
+  },
+  {
     "functionName": "srs_init_srs",
     "inArgs": [
       {
@@ -544,25 +560,6 @@
       {
         "name": "acir_composer_ptr",
         "type": "in_ptr"
-      }
-    ],
-    "outArgs": [],
-    "isAsync": false
-  },
-  {
-    "functionName": "acir_create_circuit",
-    "inArgs": [
-      {
-        "name": "acir_composer_ptr",
-        "type": "in_ptr"
-      },
-      {
-        "name": "constraint_system_buf",
-        "type": "const uint8_t *"
-      },
-      {
-        "name": "size_hint",
-        "type": "const uint32_t *"
       }
     ],
     "outArgs": [],

@@ -1,4 +1,10 @@
+import { BarretenbergSync } from '@aztec/bb.js';
+
+import { strict as assert } from 'assert';
 import { Keccak } from 'sha3';
+
+import { BufferReader } from '../../serialize/buffer_reader.js';
+import { deserializeBigInt, serializeBigInt } from '../../serialize/serialize.js';
 
 /**
  * Computes the Keccak-256 hash of the given input buffer.
@@ -30,4 +36,30 @@ export function keccak256String(input: string) {
 export function keccak224(input: Buffer) {
   const hash = new Keccak(224);
   return hash.update(input).digest();
+}
+
+/**
+ * Computes Keccakf1600.
+ * @param input - the state, 25 u64's.
+ * @returns - the updated state, 25 u64's.
+ */
+export function keccakf1600(input: bigint[]): bigint[] {
+  assert(input.length === 25, 'Input must be 25 u64s');
+  input.forEach(u64 => assert(u64 < 2n ** 64n, 'Input must be 64-bit unsigned integers'));
+  const bufferInput = Buffer.concat(
+    input.map(u64 =>
+      // Swap the bytes to little-endian.
+      serializeBigInt(u64, 64 / 8).swap64(),
+    ),
+  );
+  const result = Buffer.from(BarretenbergSync.getSingleton().keccakF1600(bufferInput));
+  const reader = BufferReader.asReader(result);
+  const output: bigint[] = [];
+  for (let i = 0; i < 25; i++) {
+    output.push(
+      // Swap the bytes back to big-endian.
+      deserializeBigInt(reader.readBytes(64 / 8).swap64()).elem,
+    );
+  }
+  return output;
 }
