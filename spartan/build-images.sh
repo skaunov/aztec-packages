@@ -13,3 +13,7 @@ earthly \
 --secret AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
 --secret AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
 $TARGET
+
+echo "need to get the image into kind"
+exit 1
+kind load docker-image aztecprotocol/aztec:whatdo

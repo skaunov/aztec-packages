@@ -42,3 +42,18 @@ spec:
                 configMapKeyRef:
                   name: ethereum-config
                   key: anvil-port
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  wget -qO- --post-data='{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":67}' \
+                  --header='Content-Type: application/json' \
+                  127.0.0.1:8545 \
+                  | grep -q '"result":"anvil'
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3

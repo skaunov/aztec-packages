@@ -3,5 +3,7 @@ resources:
   - anvil/deployment.yaml
   - anvil/service.yaml
   - anvil/configmap.yaml
+  - aztec/deploy-contracts.yaml
+  - aztec/deployment.yaml
 
 namespace: spartan

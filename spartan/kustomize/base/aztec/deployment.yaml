@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aztec
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aztec
+  template:
+    metadata:
+      labels:
+        app: aztec
+    spec:
+      initContainers:
+        - name: deploy-contracts
+          image: aztecprotocol/aztec:e9e231833a50c0763164f9a502a322549ce9d05c
+          command:
+            [
+              "/bin/sh",
+              "-c",
+              "cp /scripts/deploy-contracts.sh /tmp/deploy-contracts.sh && chmod +x /tmp/deploy-contracts.sh && /tmp/deploy-contracts.sh",
+            ]
+          volumeMounts:
+            - name: shared-volume
+              mountPath: /shared
+            - name: scripts
+              mountPath: /scripts
+          env:
+            - name: ETHEREUM_HOST
+              value: "http://ethereum.spartan:8545"
+      containers:
+        - name: aztec
+          image: aztecprotocol/aztec:e9e231833a50c0763164f9a502a322549ce9d05c
+          command:
+            [
+              "/bin/bash",
+              "-c",
+              "source /shared/contracts.env && env && node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver",
+            ]
+          volumeMounts:
+            - name: shared-volume
+              mountPath: /shared
+          env:
+            - name: ETHEREUM_HOST
+              value: "http://ethereum.spartan:8545"
+          ports:
+            - containerPort: 8080
+      volumes:
+        - name: shared-volume
+          emptyDir: {}
+        - name: scripts
+          configMap:
+            name: deploy-contracts-script
