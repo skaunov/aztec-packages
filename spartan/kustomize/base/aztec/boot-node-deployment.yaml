@@ -36,14 +36,28 @@ spec:
             [
               "/bin/bash",
               "-c",
-              "source /shared/contracts.env && env && node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver",
+              "source /shared/contracts.env && env && node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer --prover",
             ]
           volumeMounts:
             - name: shared-volume
               mountPath: /shared
           env:
+            - name: PORT
+              value: "8080"
             - name: ETHEREUM_HOST
               value: "http://ethereum.spartan:8545"
+            - name: P2P_ENABLED
+              value: "true"
+            - name: P2P_TCP_ANNOUNCE_ADDR
+              value: 0.0.0.0:40400
+            - name: P2P_UDP_ANNOUNCE_ADDR
+              value: 0.0.0.0:40400
+            - name: P2P_TCP_LISTEN_ADDR
+              value: 0.0.0.0:40400
+            - name: P2P_UDP_LISTEN_ADDR
+              value: 0.0.0.0:40400
+            - name: PEER_ID_PRIVATE_KEY
+              value: 0802122002f651fd8653925529e3baccb8489b3af4d7d9db440cbf5df4a63ff04ea69683
           ports:
             - containerPort: 8080
       volumes:
