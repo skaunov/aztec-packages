@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pxe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pxe
+  template:
+    metadata:
+      labels:
+        app: pxe
+    spec:
+      containers:
+        - name: aztec
+          image: aztecprotocol/aztec:e9e231833a50c0763164f9a502a322549ce9d05c
+          command:
+            [
+              "/bin/bash",
+              "-c",
+              "node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --pxe nodeUrl=http://boot-node.spartan:8080",
+            ]
+          env:
+            - name: ETHEREUM_HOST
+              value: "http://ethereum.spartan:8545"
+          ports:
+            - containerPort: 8080

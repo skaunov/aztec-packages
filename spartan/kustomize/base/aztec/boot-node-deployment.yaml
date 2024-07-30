@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aztec
+  name: boot-node
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: aztec
+      app: boot-node
   template:
     metadata:
       labels:
-        app: aztec
+        app: boot-node
     spec:
       initContainers:
         - name: deploy-contracts
