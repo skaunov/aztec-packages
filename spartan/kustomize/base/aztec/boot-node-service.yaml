@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: boot-node
 spec:
+  clusterIP: None
   selector:
     app: boot-node
   ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
+    - port: 40400
+      name: p2p
+    - port: 8080
+      name: node

@@ -1,36 +1,17 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: boot-node
+  name: validator
 spec:
-  serviceName: "boot-node"
   replicas: 1
   selector:
     matchLabels:
-      app: boot-node
+      app: validator
   template:
     metadata:
       labels:
-        app: boot-node
+        app: validator
     spec:
-      initContainers:
-        # todo, await the ethereum node to be ready
-        - name: deploy-contracts
-          image: aztecprotocol/aztec:e9e231833a50c0763164f9a502a322549ce9d05c
-          command:
-            [
-              "/bin/sh",
-              "-c",
-              "sleep 10 && cp /scripts/deploy-contracts.sh /tmp/deploy-contracts.sh && chmod +x /tmp/deploy-contracts.sh && /tmp/deploy-contracts.sh",
-            ]
-          volumeMounts:
-            - name: shared-volume
-              mountPath: /shared
-            - name: scripts
-              mountPath: /scripts
-          env:
-            - name: ETHEREUM_HOST
-              value: "http://ethereum.spartan:8545"
       containers:
         - name: aztec
           image: aztecprotocol/aztec:e9e231833a50c0763164f9a502a322549ce9d05c
@@ -38,7 +19,7 @@ spec:
             [
               "/bin/bash",
               "-c",
-              "source /shared/contracts.env && env && node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node p2pEnabled=true --archiver --sequencer --prover",
+              "source /shared/contracts.env && env && node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer --prover",
             ]
           volumeMounts:
             - name: shared-volume
