@@ -3,10 +3,10 @@ resources:
   - anvil/deployment.yaml
   - anvil/service.yaml
   - anvil/configmap.yaml
-  - aztec/deploy-contracts.yaml
-  - aztec/boot-node-deployment.yaml
-  - aztec/boot-node-service.yaml
-  - aztec/pxe-deployment.yaml
-  - aztec/pxe-service.yaml
+  - aztec/deploy-contracts.config-map.yaml
+  - aztec/boot-node.stateful-set.yaml
+  - aztec/boot-node.service.yaml
+  - aztec/pxe.deployment.yaml
+  - aztec/pxe.service.yaml
 
 namespace: spartan

@@ -14,14 +14,26 @@ spec:
         app: boot-node
     spec:
       initContainers:
-        # todo, await the ethereum node to be ready
+        - name: wait-for-ethereum
+          image: curlimages/curl:7.81.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until curl -s -X POST -H 'Content-Type: application/json' \
+                -d '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":67}' \
+                http://ethereum.spartan:8545 | grep -q anvil; do
+                echo "Waiting for Ethereum node..."
+                sleep 5
+              done
+              echo "Ethereum node is ready!"
         - name: deploy-contracts
           image: aztecprotocol/aztec:e9e231833a50c0763164f9a502a322549ce9d05c
           command:
             [
               "/bin/sh",
               "-c",
-              "sleep 10 && cp /scripts/deploy-contracts.sh /tmp/deploy-contracts.sh && chmod +x /tmp/deploy-contracts.sh && /tmp/deploy-contracts.sh",
+              "cp /scripts/deploy-contracts.sh /tmp/deploy-contracts.sh && chmod +x /tmp/deploy-contracts.sh && /tmp/deploy-contracts.sh",
             ]
           volumeMounts:
             - name: shared-volume
