@@ -1,0 +1,26 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx --watch-path=./src src/index.ts",
+    "build": "tsc",
+    "test": "node --harmony node_modules/.bin/jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.8",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-jest": "^28.6.0",
+    "jest": "^29.7.0",
+    "tsx": "^4.15.7",
+    "typescript": "^5.5.2"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@chainsafe/enr": "^3.0.0",
+    "@libp2p/peer-id-factory": "^4.2.2",
+    "@multiformats/multiaddr": "^12.3.0"
+  }
+}
