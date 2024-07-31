@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spartan-network.fullname" . }}-boot-node
+  labels:
+    {{- include "spartan-network.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    app: {{ include "spartan-network.fullname" . }}-boot-node
+  ports:
+    - port: {{ .Values.bootNode.service.p2pPort }}
+      name: p2p
+    - port: {{ .Values.bootNode.service.nodePort }}
+      name: node

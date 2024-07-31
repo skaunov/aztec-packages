@@ -30,6 +30,8 @@ export interface P2PService {
    * @param tx - The transaction to be propagated.
    */
   propagateTx(tx: Tx): void;
+
+  getEnr(): ENR | undefined;
 }
 
 /**
@@ -71,4 +73,5 @@ export interface PeerDiscoveryService extends EventEmitter {
   emit(event: 'peer:discovered', enr: ENR): boolean;
 
   getStatus(): PeerDiscoveryState;
+  getEnr(): ENR | undefined;
 }

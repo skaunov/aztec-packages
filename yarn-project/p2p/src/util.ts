@@ -28,7 +28,7 @@ export async function convertToMultiaddr(address: string, protocol: 'tcp' | 'udp
       throw new Error(`Could not resolve address: ${addr}`);
     }
     addr = resolvedAddresses[0];
-    multiaddrPrefix = 'dns4';
+    multiaddrPrefix = 'ip4';
   }
 
   return `/${multiaddrPrefix}/${addr}/${protocol}/${port}`;

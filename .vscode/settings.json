@@ -171,4 +171,11 @@
   },
   "cmake.sourceDirectory": "${workspaceFolder}/barretenberg/cpp",
   "typescript.tsserver.maxTsServerMemory": 4096,
+  "yaml.schemas": {
+    "file:///Users/mitch/.vscode/extensions/atlassian.atlascode-2.10.12/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml",
+    "https://json.schemastore.org/helmfile.json": "file:///home/mitch/aztec-clones/alpha/spartan/spartan-network/charts/boot-node.stateful-set.yaml"
+  },
+  "lldb.showDisassembly": "auto",
+  "lldb.dereferencePointers": true,
+  "lldb.consoleMode": "commands"
 }

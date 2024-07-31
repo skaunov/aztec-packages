@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: boot-node
+  name: {{ .Release.Name }}-boot-node
 spec:
-  serviceName: "boot-node"
-  replicas: 1
+  serviceName: "{{ .Release.Name }}-boot-node"
+  replicas: {{ .Values.bootNode.replicas }}
   selector:
     matchLabels:
       app: boot-node
@@ -15,20 +15,20 @@ spec:
     spec:
       initContainers:
         - name: wait-for-ethereum
-          image: curlimages/curl:7.81.0
+          image: {{ .Values.images.curl.image }}
           command:
             - /bin/sh
             - -c
             - |
               until curl -s -X POST -H 'Content-Type: application/json' \
                 -d '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":67}' \
-                http://ethereum.spartan:8545 | grep -q anvil; do
+                {{ include "spartan-network.ethereumHost" . }} | grep -q anvil; do
                 echo "Waiting for Ethereum node..."
                 sleep 5
               done
               echo "Ethereum node is ready!"
         - name: deploy-contracts
-          image: aztecprotocol/aztec:243df5dd6ae276b885f4d154e15e6fe47bfb10f5
+          image: {{ .Values.images.aztec.image }}
           command:
             [
               "/bin/sh",
@@ -42,10 +42,10 @@ spec:
               mountPath: /scripts
           env:
             - name: ETHEREUM_HOST
-              value: "http://ethereum.spartan:8545"
+              value: {{ include "spartan-network.ethereumHost" . | quote }}
       containers:
         - name: aztec
-          image: aztecprotocol/aztec:243df5dd6ae276b885f4d154e15e6fe47bfb10f5
+          image: {{ .Values.images.aztec.image }}
           command:
             [
               "/bin/bash",
@@ -65,30 +65,30 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: POD_DNS_NAME
-              value: "$(POD_NAME).boot-node.$(POD_NAMESPACE).svc.cluster.local"
+              value: "$(POD_NAME).{{ include "spartan-network.fullname" . }}-bootNode.$(POD_NAMESPACE).svc.cluster.local"
             - name: PORT
-              value: "8080"
+              value: "{{ .Values.bootNode.service.nodePort }}"
             - name: LOG_LEVEL
-              value: "debug"
+              value: "{{ .Values.bootNode.logLevel }}"
             - name: DEBUG
-              value: "aztec:*"
+              value: "{{ .Values.bootNode.debug }}"
             - name: ETHEREUM_HOST
-              value: "http://ethereum.spartan:8545"
+              value: {{ include "spartan-network.ethereumHost" . | quote }}
             - name: P2P_ENABLED
-              value: "true"
+              value: "{{ .Values.bootNode.p2p.enabled }}"
             - name: P2P_TCP_ANNOUNCE_ADDR
-              value: "$(POD_DNS_NAME):40400"
+              value: "$(POD_DNS_NAME):{{ .Values.bootNode.service.p2pPort }}"
             - name: P2P_UDP_ANNOUNCE_ADDR
-              value: "$(POD_DNS_NAME):40400"
+              value: "$(POD_DNS_NAME):{{ .Values.bootNode.service.p2pPort }}"
             - name: P2P_TCP_LISTEN_ADDR
-              value: 0.0.0.0:40400
+              value: "0.0.0.0:{{ .Values.bootNode.service.p2pPort }}"
             - name: P2P_UDP_LISTEN_ADDR
-              value: 0.0.0.0:40400
-            - name: PEER_ID_PRIVATE_KEY
-              value: 0802122002f651fd8653925529e3baccb8489b3af4d7d9db440cbf5df4a63ff04ea69683
+              value: "0.0.0.0:{{ .Values.bootNode.service.p2pPort }}"
           ports:
             - containerPort: 8080
             - containerPort: 40400
+          resources:
+            {{- toYaml .Values.bootNode.resources | nindent 12 }}
       volumes:
         - name: shared-volume
           emptyDir: {}

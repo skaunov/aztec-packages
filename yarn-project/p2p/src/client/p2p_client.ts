@@ -3,6 +3,8 @@ import { INITIAL_L2_BLOCK_NUM } from '@aztec/circuits.js/constants';
 import { createDebugLogger } from '@aztec/foundation/log';
 import { type AztecKVStore, type AztecSingleton } from '@aztec/kv-store';
 
+import { ENR } from '@chainsafe/enr';
+
 import { getP2PConfigEnvVars } from '../config.js';
 import type { P2PService } from '../service/service.js';
 import { type TxPool } from '../tx_pool/index.js';
@@ -90,6 +92,11 @@ export interface P2P {
    * Returns the current status of the p2p client.
    */
   getStatus(): Promise<P2PSyncState>;
+
+  /**
+   * Returns the ENR for this node
+   */
+  getEnr(): ENR | undefined;
 }
 
 /**
@@ -322,6 +329,13 @@ export class P2PClient implements P2P {
       state: this.currentState,
       syncedToL2Block: this.getSyncedLatestBlockNum(),
     } as P2PSyncState);
+  }
+
+  /**
+   * Returns the ENR for this node
+   */
+  public getEnr(): ENR | undefined {
+    return this.p2pService.getEnr();
   }
 
   /**

@@ -8,6 +8,7 @@ export async function getNodeInfo(rpcUrl: string, debugLogger: DebugLogger, log:
   log(`Node Version: ${info.nodeVersion}`);
   log(`Chain Id: ${info.l1ChainId}`);
   log(`Protocol Version: ${info.protocolVersion}`);
+  log(`Node ENR: ${info.enr}`);
   log(`L1 Contract Addresses:`);
   log(` Rollup Address: ${info.l1ContractAddresses.rollupAddress.toString()}`);
   log(` Registry Address: ${info.l1ContractAddresses.registryAddress.toString()}`);

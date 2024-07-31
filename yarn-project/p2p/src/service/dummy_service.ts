@@ -1,5 +1,6 @@
 import type { Tx, TxHash } from '@aztec/circuit-types';
 
+import { ENR } from '@chainsafe/enr';
 import type { PeerId } from '@libp2p/interface';
 import EventEmitter from 'events';
 
@@ -36,6 +37,10 @@ export class DummyP2PService implements P2PService {
    * @param _ - The hashes of the settled transactions.
    */
   public settledTxs(_: TxHash[]) {}
+
+  public getEnr(): ENR | undefined {
+    return undefined;
+  }
 }
 
 /**
@@ -77,5 +82,9 @@ export class DummyPeerDiscoveryService extends EventEmitter implements PeerDisco
 
   public getStatus(): PeerDiscoveryState {
     return this.currentState;
+  }
+
+  public getEnr(): ENR | undefined {
+    return undefined;
   }
 }

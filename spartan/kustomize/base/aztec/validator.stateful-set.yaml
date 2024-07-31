@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
         - name: configure-validator-env
-          image: aztecprotocol/aztec:803fd7e08dc236027fc5cd12996c88ee679a30a9
+          image: aztecprotocol/aztec:243df5dd6ae276b885f4d154e15e6fe47bfb10f5
           command:
             [
               "/bin/sh",
@@ -32,7 +32,7 @@ spec:
               value: "http://ethereum.spartan:8545"
       containers:
         - name: aztec
-          image: aztecprotocol/aztec:803fd7e08dc236027fc5cd12996c88ee679a30a9
+          image: aztecprotocol/aztec:243df5dd6ae276b885f4d154e15e6fe47bfb10f5
           command:
             [
               "/bin/bash",
@@ -57,8 +57,8 @@ spec:
               value: "8080"
             - name: LOG_LEVEL
               value: "debug"
-            # - name: DEBUG
-            #   value: "discv5:*,aztec:discv5_service:*,aztec:libp2p_service:*"
+            - name: DEBUG
+              value: "aztec:*"
             - name: ETHEREUM_HOST
               value: "http://ethereum.spartan:8545"
             - name: P2P_ENABLED
@@ -72,7 +72,7 @@ spec:
             - name: P2P_UDP_LISTEN_ADDR
               value: 0.0.0.0:40400
             - name: BOOTSTRAP_NODES
-              value: enr:-KW4QH6goWfOR0V7KiH39jiK6QsDvJnNMRCeMqu3vuBuCVtBO0-oFaLpbM09mAs4oF4QDnra-VHqiMiTbwFCkk-0LQwGjWF6dGVjX25ldHdvcmsBgmlkgnY0g2lwNowLMTAuMjQ0LjAuNTOJc2VjcDI1NmsxoQJCgkvy-XI7OMRmPDJPt7kwvzl3cX34ixr0KcJvYHp0_4R0Y3A2gp3QhHVkcDaCndA
+              value: enr:-Jq4QCXaAMeJOV2x7KtRnlRRDsk-IkcDPrsaZlv6YjS-zQG_KYeL8sWIGDQhW5Q4Me52ZakUrHr1pGxYJ96kb0WtD8MGjWF6dGVjX25ldHdvcmsBgmlkgnY0gmlwhAr0AFKJc2VjcDI1NmsxoQJCgkvy-XI7OMRmPDJPt7kwvzl3cX34ixr0KcJvYHp0_4N0Y3CCndCDdWRwgp3Q
           ports:
             - containerPort: 8080
             - containerPort: 40400

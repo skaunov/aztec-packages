@@ -9,6 +9,7 @@ TARGET=$SCRIPT_DIR/../yarn-project+export-aztec
 
 # make temp file for build logs within the script dir
 LOG_FILE=$SCRIPT_DIR/build.log
+rm -f $LOG_FILE
 touch $LOG_FILE
 
 

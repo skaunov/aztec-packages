@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: aztec
-          image: aztecprotocol/aztec:e9e231833a50c0763164f9a502a322549ce9d05c
+          image: aztecprotocol/aztec:243df5dd6ae276b885f4d154e15e6fe47bfb10f5
           command:
             [
               "/bin/bash",

@@ -35,6 +35,7 @@ describe('Contract Class', () => {
     l1ChainId: 1,
     protocolVersion: 2,
     l1ContractAddresses: l1Addresses,
+    enr: 'enr:/foo/',
     protocolContractAddresses: {
       classRegisterer: AztecAddress.random(),
       gasToken: AztecAddress.random(),

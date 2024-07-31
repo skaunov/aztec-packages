@@ -4,6 +4,7 @@ import { createDebugLogger } from '@aztec/foundation/log';
 import { RunningPromise } from '@aztec/foundation/running-promise';
 import type { AztecKVStore } from '@aztec/kv-store';
 
+import { ENR } from '@chainsafe/enr';
 import { type GossipsubEvents, gossipsub } from '@chainsafe/libp2p-gossipsub';
 import { noise } from '@chainsafe/libp2p-noise';
 import { yamux } from '@chainsafe/libp2p-yamux';
@@ -200,6 +201,10 @@ export class LibP2PService implements P2PService {
     });
 
     return new LibP2PService(config, node, peerDiscoveryService, txPool);
+  }
+
+  public getEnr(): ENR | undefined {
+    return this.peerDiscoveryService.getEnr();
   }
 
   /**

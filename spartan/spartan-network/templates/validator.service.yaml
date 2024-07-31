@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spartan-network.fullname" . }}-validator
+  labels:
+    {{- include "spartan-network.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    {{- include "spartan-network.selectorLabels" . | nindent 4 }}
+    app: validator
+  ports:
+    - port: {{ .Values.validator.service.p2pPort }}
+      name: p2p
+    - port: {{ .Values.validator.service.nodePort }}
+      name: node

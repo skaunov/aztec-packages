@@ -333,4 +333,9 @@ export interface AztecNode {
    * @param address - Address of the deployed contract.
    */
   getContract(address: AztecAddress): Promise<ContractInstanceWithAddress | undefined>;
+
+  /**
+   * Returns the ENR of this node for peer discovery, if available.
+   */
+  getEncodedEnr(): Promise<string>;
 }
