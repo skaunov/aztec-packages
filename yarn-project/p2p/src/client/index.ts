@@ -1,13 +1,15 @@
 import { type L2BlockSource } from '@aztec/circuit-types';
 import { type AztecKVStore } from '@aztec/kv-store';
 
+import { multiaddr } from '@multiformats/multiaddr';
+
 import { P2PClient } from '../client/p2p_client.js';
 import { type P2PConfig } from '../config.js';
 import { DiscV5Service } from '../service/discV5_service.js';
 import { DummyP2PService } from '../service/dummy_service.js';
 import { LibP2PService, createLibP2PPeerId } from '../service/index.js';
 import { type TxPool } from '../tx_pool/index.js';
-import { getPublicIp, splitAddressPort } from '../util.js';
+import { convertToMultiaddr, getPublicIp, splitAddressPort } from '../util.js';
 
 export * from './p2p_client.js';
 
@@ -55,10 +57,27 @@ export const createP2PClient = async (
         config.udpAnnounceAddress = udpAnnounceAddress;
       }
     }
+    // ensure we have a valid announce address
+    if (!config.tcpAnnounceAddress) {
+      throw new Error('You need to provide a TCP announce address.');
+    }
 
     // Create peer discovery service
     const peerId = await createLibP2PPeerId(config.peerIdPrivateKey);
-    const discoveryService = new DiscV5Service(peerId, config);
+    const listenMultiAddrUdp = multiaddr(await convertToMultiaddr(config.udpListenAddress, 'udp'));
+    const tcpAnnounceAddr = await convertToMultiaddr(config.tcpAnnounceAddress, 'tcp');
+    const broadcastMultiAddrTcp = multiaddr(`${tcpAnnounceAddr}/p2p/${peerId.toString()}`);
+    const udpAnnounceAddr = await convertToMultiaddr(config.udpAnnounceAddress || config.tcpAnnounceAddress, 'udp');
+    const broadcastMultiAddrUdp = multiaddr(`${udpAnnounceAddr}/p2p/${peerId.toString()}`);
+    const discoveryService = new DiscV5Service(
+      peerId,
+      {
+        broadcastMultiAddrTcp,
+        broadcastMultiAddrUdp,
+        listenMultiAddrUdp,
+      },
+      config,
+    );
     p2pService = await LibP2PService.new(config, discoveryService, peerId, txPool, store);
   } else {
     p2pService = new DummyP2PService();

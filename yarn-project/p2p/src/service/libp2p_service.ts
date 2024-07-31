@@ -79,7 +79,7 @@ export class LibP2PService implements P2PService {
     if (!tcpAnnounceAddress) {
       throw new Error('Announce address not provided.');
     }
-    const announceTcpMultiaddr = convertToMultiaddr(tcpAnnounceAddress, 'tcp');
+    const announceTcpMultiaddr = await convertToMultiaddr(tcpAnnounceAddress, 'tcp');
     this.logger.info(`Announcing at ${announceTcpMultiaddr}`);
 
     // Start job queue, peer discovery service and libp2p node
@@ -136,9 +136,9 @@ export class LibP2PService implements P2PService {
     store: AztecKVStore,
   ) {
     const { tcpListenAddress, tcpAnnounceAddress, minPeerCount, maxPeerCount } = config;
-    const bindAddrTcp = convertToMultiaddr(tcpListenAddress, 'tcp');
+    const bindAddrTcp = await convertToMultiaddr(tcpListenAddress, 'tcp');
     // We know tcpAnnounceAddress cannot be null here because we set it or throw when setting up the service.
-    const announceAddrTcp = convertToMultiaddr(tcpAnnounceAddress!, 'tcp');
+    const announceAddrTcp = await convertToMultiaddr(tcpAnnounceAddress!, 'tcp');
 
     const datastore = new AztecDatastore(store);
 

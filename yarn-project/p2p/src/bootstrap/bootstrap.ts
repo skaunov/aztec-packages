@@ -37,13 +37,13 @@ export class BootstrapNode {
     this.peerId = peerId;
     const enr = SignableENR.createFromPeerId(peerId);
 
-    const listenAddrUdp = multiaddr(convertToMultiaddr(udpListenAddress, 'udp'));
+    const listenAddrUdp = multiaddr(await convertToMultiaddr(udpListenAddress, 'udp'));
 
     if (!udpAnnounceAddress) {
       throw new Error('You need to provide a UDP announce address.');
     }
 
-    const publicAddr = multiaddr(convertToMultiaddr(udpAnnounceAddress, 'udp'));
+    const publicAddr = multiaddr(await convertToMultiaddr(udpAnnounceAddress, 'udp'));
     enr.setLocationMultiaddr(publicAddr);
     enr.set(AZTEC_ENR_KEY, Uint8Array.from([AZTEC_NET]));
 

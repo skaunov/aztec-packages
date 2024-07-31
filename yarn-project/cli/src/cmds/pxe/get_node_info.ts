@@ -8,11 +8,19 @@ export async function getNodeInfo(rpcUrl: string, debugLogger: DebugLogger, log:
   log(`Node Version: ${info.nodeVersion}`);
   log(`Chain Id: ${info.l1ChainId}`);
   log(`Protocol Version: ${info.protocolVersion}`);
-  log(`Rollup Address: ${info.l1ContractAddresses.rollupAddress.toString()}`);
-  log(`Protocol Contract Addresses:`);
-  log(` Class Registerer:  ${info.protocolContractAddresses.classRegisterer.toString()}`);
-  log(` Gas Token:         ${info.protocolContractAddresses.gasToken.toString()}`);
+  log(`L1 Contract Addresses:`);
+  log(` Rollup Address: ${info.l1ContractAddresses.rollupAddress.toString()}`);
+  log(` Registry Address: ${info.l1ContractAddresses.registryAddress.toString()}`);
+  log(` L1 -> L2 Inbox Address: ${info.l1ContractAddresses.inboxAddress.toString()}`);
+  log(` L2 -> L1 Outbox Address: ${info.l1ContractAddresses.outboxAddress.toString()}`);
+  log(` Availability Oracle Address: ${info.l1ContractAddresses.availabilityOracleAddress.toString()}`);
+  log(` Gas Token Address: ${info.l1ContractAddresses.gasTokenAddress.toString()}`);
+  log(` Gas Portal Address: ${info.l1ContractAddresses.gasPortalAddress.toString()}`);
+
+  log(`L2 Contract Addresses:`);
+  log(` Class Registerer: ${info.protocolContractAddresses.classRegisterer.toString()}`);
+  log(` Gas Token: ${info.protocolContractAddresses.gasToken.toString()}`);
   log(` Instance Deployer: ${info.protocolContractAddresses.instanceDeployer.toString()}`);
-  log(` Key Registry:      ${info.protocolContractAddresses.keyRegistry.toString()}`);
-  log(` MultiCall:         ${info.protocolContractAddresses.multiCallEntrypoint.toString()}`);
+  log(` Key Registry: ${info.protocolContractAddresses.keyRegistry.toString()}`);
+  log(` MultiCall: ${info.protocolContractAddresses.multiCallEntrypoint.toString()}`);
 }

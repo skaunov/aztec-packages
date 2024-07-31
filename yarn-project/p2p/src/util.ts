@@ -1,3 +1,5 @@
+import { resolve } from 'dns/promises';
+
 /**
  * Converts an address string to a multiaddr string.
  * Example usage:
@@ -8,8 +10,8 @@
  * @param protocol - The protocol to use in the multiaddr string.
  * @returns A multiaddr compliant string.
  */
-export function convertToMultiaddr(address: string, protocol: 'tcp' | 'udp'): string {
-  const [addr, port] = splitAddressPort(address, false);
+export async function convertToMultiaddr(address: string, protocol: 'tcp' | 'udp'): Promise<string> {
+  let [addr, port] = splitAddressPort(address, false);
 
   let multiaddrPrefix: string;
 
@@ -20,7 +22,13 @@ export function convertToMultiaddr(address: string, protocol: 'tcp' | 'udp'): st
     // IPv4 address
     multiaddrPrefix = 'ip4';
   } else {
-    throw new Error('Invalid address format. Expected an IPv4 or IPv6 address.');
+    // DNS address
+    const resolvedAddresses = await resolve(addr);
+    if (resolvedAddresses.length === 0) {
+      throw new Error(`Could not resolve address: ${addr}`);
+    }
+    addr = resolvedAddresses[0];
+    multiaddrPrefix = 'dns4';
   }
 
   return `/${multiaddrPrefix}/${addr}/${protocol}/${port}`;

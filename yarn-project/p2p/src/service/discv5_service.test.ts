@@ -2,10 +2,12 @@ import { sleep } from '@aztec/foundation/sleep';
 
 import { jest } from '@jest/globals';
 import type { PeerId } from '@libp2p/interface';
+import { multiaddr } from '@multiformats/multiaddr';
 import { SemVer } from 'semver';
 
 import { BootstrapNode } from '../bootstrap/bootstrap.js';
 import { type P2PConfig } from '../config.js';
+import { convertToMultiaddr } from '../util.js';
 import { DiscV5Service } from './discV5_service.js';
 import { createLibP2PPeerId } from './libp2p_service.js';
 import { PeerDiscoveryState } from './service.js';
@@ -138,6 +140,19 @@ describe('Discv5Service', () => {
       txGossipVersion: new SemVer('0.1.0'),
       keepProvenTxsInPoolFor: 0,
     };
-    return new DiscV5Service(peerId, config);
+    const listenMultiAddrUdp = multiaddr(await convertToMultiaddr(config.udpListenAddress, 'udp'));
+    const tcpAnnounceAddr = await convertToMultiaddr(config.tcpAnnounceAddress!, 'tcp');
+    const broadcastMultiAddrTcp = multiaddr(`${tcpAnnounceAddr}/p2p/${peerId.toString()}`);
+    const udpAnnounceAddr = await convertToMultiaddr(config.udpAnnounceAddress!, 'udp');
+    const broadcastMultiAddrUdp = multiaddr(`${udpAnnounceAddr}/p2p/${peerId.toString()}`);
+    return new DiscV5Service(
+      peerId,
+      {
+        broadcastMultiAddrTcp,
+        broadcastMultiAddrUdp,
+        listenMultiAddrUdp,
+      },
+      config,
+    );
   };
 });

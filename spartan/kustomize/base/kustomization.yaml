@@ -8,5 +8,8 @@ resources:
   - aztec/boot-node.service.yaml
   - aztec/pxe.deployment.yaml
   - aztec/pxe.service.yaml
+  - aztec/configure-validator-env.config-map.yaml
+  - aztec/validator.stateful-set.yaml
+  - aztec/validator.service.yaml
 
 namespace: spartan

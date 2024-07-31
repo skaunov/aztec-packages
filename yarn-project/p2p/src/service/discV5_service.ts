@@ -4,11 +4,10 @@ import { sleep } from '@aztec/foundation/sleep';
 import { Discv5, type Discv5EventEmitter } from '@chainsafe/discv5';
 import { ENR, SignableENR } from '@chainsafe/enr';
 import type { PeerId } from '@libp2p/interface';
-import { multiaddr } from '@multiformats/multiaddr';
+import { Multiaddr } from '@multiformats/multiaddr';
 import EventEmitter from 'events';
 
 import type { P2PConfig } from '../config.js';
-import { convertToMultiaddr } from '../util.js';
 import { type PeerDiscoveryService, PeerDiscoveryState } from './service.js';
 
 export const AZTEC_ENR_KEY = 'aztec_network';
@@ -41,7 +40,20 @@ export class DiscV5Service extends EventEmitter implements PeerDiscoveryService 
 
   private startTime = 0;
 
-  constructor(private peerId: PeerId, config: P2PConfig, private logger = createDebugLogger('aztec:discv5_service')) {
+  constructor(
+    private peerId: PeerId,
+    {
+      broadcastMultiAddrTcp,
+      broadcastMultiAddrUdp,
+      listenMultiAddrUdp,
+    }: {
+      broadcastMultiAddrTcp: Multiaddr;
+      broadcastMultiAddrUdp: Multiaddr;
+      listenMultiAddrUdp: Multiaddr;
+    },
+    config: P2PConfig,
+    private logger = createDebugLogger('aztec:discv5_service'),
+  ) {
     super();
     const { tcpAnnounceAddress, udpAnnounceAddress, udpListenAddress, bootstrapNodes } = config;
     this.bootstrapNodes = bootstrapNodes;
@@ -54,17 +66,11 @@ export class DiscV5Service extends EventEmitter implements PeerDiscoveryService 
       throw new Error('You need to provide at least a TCP announce address.');
     }
 
-    const multiAddrTcp = multiaddr(`${convertToMultiaddr(tcpAnnounceAddress, 'tcp')}/p2p/${peerId.toString()}`);
-    // if no udp announce address is provided, use the tcp announce address
-    const multiAddrUdp = multiaddr(
-      `${convertToMultiaddr(udpAnnounceAddress || tcpAnnounceAddress, 'udp')}/p2p/${peerId.toString()}`,
-    );
-
-    const listenMultiAddrUdp = multiaddr(convertToMultiaddr(udpListenAddress, 'udp'));
-
     // set location multiaddr in ENR record
-    this.enr.setLocationMultiaddr(multiAddrUdp);
-    this.enr.setLocationMultiaddr(multiAddrTcp);
+    this.enr.setLocationMultiaddr(broadcastMultiAddrUdp);
+    this.enr.setLocationMultiaddr(broadcastMultiAddrTcp);
+
+    this.logger.info(this.enr.toENR().encodeTxt());
 
     this.discv5 = Discv5.create({
       enr: this.enr,
@@ -77,7 +83,7 @@ export class DiscV5Service extends EventEmitter implements PeerDiscoveryService 
     });
 
     this.logger.info(`ENR NodeId: ${this.enr.nodeId}`);
-    this.logger.info(`ENR UDP: ${multiAddrUdp.toString()}`);
+    this.logger.info(`ENR UDP: ${broadcastMultiAddrUdp.toString()}`);
 
     (this.discv5 as Discv5EventEmitter).on('discovered', (enr: ENR) => this.onDiscovered(enr));
     (this.discv5 as Discv5EventEmitter).on('enrAdded', async (enr: ENR) => {
