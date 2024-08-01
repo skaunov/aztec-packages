@@ -7,7 +7,8 @@ metadata:
 spec:
   clusterIP: None
   selector:
-    app: {{ include "spartan-network.fullname" . }}-boot-node
+    {{- include "spartan-network.selectorLabels" . | nindent 4 }}
+    app: boot-node
   ports:
     - port: {{ .Values.bootNode.service.p2pPort }}
       name: p2p

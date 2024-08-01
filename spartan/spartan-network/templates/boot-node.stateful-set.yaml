@@ -1,16 +1,20 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Release.Name }}-boot-node
+  name: {{ include "spartan-network.fullname" . }}-boot-node
+  labels:
+    {{- include "spartan-network.labels" . | nindent 4 }}
 spec:
-  serviceName: "{{ .Release.Name }}-boot-node"
+  serviceName: {{ include "spartan-network.fullname" . }}-boot-node
   replicas: {{ .Values.bootNode.replicas }}
   selector:
     matchLabels:
+      {{- include "spartan-network.selectorLabels" . | nindent 6 }}
       app: boot-node
   template:
     metadata:
       labels:
+        {{- include "spartan-network.selectorLabels" . | nindent 8 }}
         app: boot-node
     spec:
       initContainers:
@@ -65,7 +69,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: POD_DNS_NAME
-              value: "$(POD_NAME).{{ include "spartan-network.fullname" . }}-bootNode.$(POD_NAMESPACE).svc.cluster.local"
+              value: "$(POD_NAME).{{ include "spartan-network.fullname" . }}-boot-node.$(POD_NAMESPACE).svc.cluster.local"
             - name: PORT
               value: "{{ .Values.bootNode.service.nodePort }}"
             - name: LOG_LEVEL
@@ -94,4 +98,4 @@ spec:
           emptyDir: {}
         - name: scripts
           configMap:
-            name: deploy-contracts-script
+            name: {{ include "spartan-network.fullname" . }}-deploy-contracts-script

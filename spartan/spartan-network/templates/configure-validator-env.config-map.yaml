@@ -12,7 +12,7 @@ data:
     # Ask the bootnode for l1 contract addresses
     output=$(node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js get-node-info -u http://{{ include "spartan-network.fullname" . }}-boot-node-0.{{ include "spartan-network.fullname" . }}-boot-node.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.bootNode.service.nodePort }})
 
-    boot_node_enr=$(echo "$output" | grep -oP 'Node ENR: \K[a-zA-Z0-9\-\_\.]+')
+    boot_node_enr=$(echo "$output" | grep -oP 'Node ENR: \Kenr:[a-zA-Z0-9\-\_\.]+')
     rollup_address=$(echo "$output" | grep -oP 'Rollup Address: \K0x[a-fA-F0-9]{40}')
     registry_address=$(echo "$output" | grep -oP 'Registry Address: \K0x[a-fA-F0-9]{40}')
     inbox_address=$(echo "$output" | grep -oP 'L1 -> L2 Inbox Address: \K0x[a-fA-F0-9]{40}')
