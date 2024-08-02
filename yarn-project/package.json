@@ -52,6 +52,7 @@
     "rollup-provider",
     "sequencer-client",
     "scripts",
+    "spartan",
     "types",
     "txe",
     "world-state",

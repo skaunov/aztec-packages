@@ -3,21 +3,21 @@
   "entryPointStrategy": "packages",
   "entryPoints": [
     "accounts",
-    "simulator",
     "archiver",
     "aztec-cli",
-    "pxe",
-    "aztec",
+    "aztec-node",
     "aztec.js",
-    "key-store",
-    "noir-contracts.js",
+    "aztec",
     "builder",
+    "key-store",
+    "merkle-tree",
+    "noir-contracts.js",
     "p2p",
     "prover-client",
-    "aztec-node",
+    "pxe",
     "sequencer-client",
+    "simulator",
     "types",
-    "world-state",
-    "merkle-tree"
+    "world-state"
   ]
 }

@@ -1,18 +1,9 @@
 {
+  "extends": "..",
   "compilerOptions": {
-    "module": "NodeNext",
-    "target": "ESNext",
-    "strict": true,
-    "sourceMap": true,
-    "outDir": "dist",
-    "types": ["node", "jest"],
-    "moduleResolution": "NodeNext",
-    "lib": ["dom", "esnext", "es2017.object"],
-    "baseUrl": ".",
-    "paths": {
-      "@aztec/cli": ["../yarn-project/cli/src"],
-      "@aztec/foundation": ["../yarn-project/foundation/src"]
-    }
+    "outDir": "dest",
+    "rootDir": "src",
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "include": ["src/**/*"]
+  "include": ["src"]
 }
