@@ -15,7 +15,7 @@ bootNode:
     p2pPort: 40400
     nodePort: 8080
   logLevel: "debug"
-  debug: ""
+  debug: "discv5:*,aztec:*"
   p2p:
     enabled: "true"
   resources: {}
@@ -26,7 +26,7 @@ validator:
     p2pPort: 40400
     nodePort: 8080
   logLevel: "debug"
-  debug: "discv5:*,aztec:discv5_service"
+  debug: "discv5:*,aztec:*"
   p2p:
     enabled: "true"
   resources: {}

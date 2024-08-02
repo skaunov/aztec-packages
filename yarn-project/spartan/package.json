@@ -1,5 +1,6 @@
 {
   "type": "module",
+  "packageManager": "yarn@3.6.3",
   "scripts": {
     "start": "node dist/index.js",
     "dev": "tsx --watch-path=./src src/index.ts",
@@ -22,5 +23,9 @@
     "@chainsafe/enr": "^3.0.0",
     "@libp2p/peer-id-factory": "^4.2.2",
     "@multiformats/multiaddr": "^12.3.0"
+  },
+  "resolutions": {
+    "@aztec/cli": "portal:../yarn-project/cli",
+    "@aztec/foundation": "portal:../yarn-project/foundation"
   }
 }

@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['http://{{ include "spartan-network.fullname" . }}-boot-node-0.{{ include "spartan-network.fullname" . }}-boot-node.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.bootNode.service.nodePort }}']
+      args: ['google.com']
   restartPolicy: Never
