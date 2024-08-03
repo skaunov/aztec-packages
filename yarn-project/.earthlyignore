@@ -5,6 +5,9 @@
 **/Dockerfile*
 **/docker-compose*.yml
 
+# ignore templates that don't go in any containers
+spartan/spartan-network
+
 # root .gitignore contents
 dest
 node_modules

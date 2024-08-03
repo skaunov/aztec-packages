@@ -1,0 +1,35 @@
+VERSION 0.8
+
+# Earthfile for generating the test image that get deployed in the k8s cluster
+# to test the network
+
+spartan-test-prod:
+    FROM ../+build
+
+    RUN yarn workspaces focus @aztec/spartan --production && yarn cache clean
+    # Remove a bunch of stuff that we don't need that takes up space.
+    RUN rm -rf \
+        ../noir-projects \
+        ../l1-contracts \
+        ../barretenberg/ts/src \
+        ../barretenberg/ts/dest/node-cjs \
+        ../barretenberg/ts/dest/browser
+    COPY --dir ../+rollup-verifier-contract/usr/src/bb /usr/src
+    SAVE ARTIFACT /usr/src /usr/src
+
+spartan-test:
+    FROM ../+end-to-end-base
+
+    COPY ../+anvil/anvil /opt/foundry/bin/anvil
+    COPY ../+end-to-end-prod/usr/src /usr/src
+    WORKDIR /usr/src/yarn-project/spartan
+    ENTRYPOINT ["yarn", "test"]
+
+export-spartan-test:
+    ARG EARTHLY_GIT_HASH
+    FROM +spartan-test
+    SAVE IMAGE aztecprotocol/spartan-test:$EARTHLY_GIT_HASH
+
+export-all:
+    BUILD ../+export-aztec
+    BUILD +export-spartan-test

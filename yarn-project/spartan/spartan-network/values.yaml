@@ -1,6 +1,9 @@
 images:
+  test:
+    image: aztecprotocol/spartan-test:8d93a281899690cb3d906abe9e7d434f4222c43e
+    pullPolicy: IfNotPresent
   aztec:
-    image: aztecprotocol/aztec:e882622ad3dac662acb90e5bd845e3824d3b1e58
+    image: aztecprotocol/aztec:8d93a281899690cb3d906abe9e7d434f4222c43e
     pullPolicy: IfNotPresent
   curl:
     image: curlimages/curl:7.81.0
@@ -14,10 +17,10 @@ bootNode:
   service:
     p2pPort: 40400
     nodePort: 8080
-  logLevel: "debug"
-  debug: "discv5:*,aztec:*"
+  logLevel: 'debug'
+  debug: 'discv5:*,aztec:*'
   p2p:
-    enabled: "true"
+    enabled: 'true'
   resources: {}
 
 validator:
@@ -25,10 +28,10 @@ validator:
   service:
     p2pPort: 40400
     nodePort: 8080
-  logLevel: "debug"
-  debug: "discv5:*,aztec:*"
+  logLevel: 'debug'
+  debug: 'discv5:*,aztec:*'
   p2p:
-    enabled: "true"
+    enabled: 'true'
   resources: {}
 
 pxe:
@@ -42,8 +45,8 @@ pxe:
 ethereum:
   replicas: 1
   chainId: 31337
-  forkUrl: ""
-  forkBlockNumber: ""
+  forkUrl: ''
+  forkBlockNumber: ''
   service:
     type: ClusterIP
     port: 8545

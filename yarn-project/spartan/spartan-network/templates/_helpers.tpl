@@ -53,3 +53,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "spartan-network.ethereumHost" -}}
 http://{{ include "spartan-network.fullname" . }}-ethereum.{{ .Release.Namespace }}:{{ .Values.ethereum.service.port }}
 {{- end -}}
+
+{{- define "spartan-network.pxeUrl" -}}
+http://{{ include "spartan-network.fullname" . }}-pxe.{{ .Release.Namespace }}:{{ .Values.pxe.service.port }}
+{{- end -}}
