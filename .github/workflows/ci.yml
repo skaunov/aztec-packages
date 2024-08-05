@@ -125,7 +125,10 @@ jobs:
       # (Note ARM uses just 2 tests as a smoketest)
       - name: Create list of non-bench end-to-end jobs
         id: e2e_list
-        run: echo "list=$(earthly ls ./yarn-project/end-to-end | grep -v '+base' | grep -v '+bench' |  sed 's/+//' | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
+        run: echo "list=$(earthly ls ./yarn-project/end-to-end | grep -v '+base' | grep -v '+bench' | grep -v '+spartan' |  sed 's/+//' | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
+      - name: Create list of spartan end-to-end jobs
+        id: spartan_list
+        run: echo "list=$(earthly ls ./yarn-project/end-to-end | grep '+spartan' |  sed 's/+//' | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
       - name: Create list of bench end-to-end jobs
         id: bench_list
         run: echo "list=$(earthly ls ./yarn-project/end-to-end | grep '+bench' |  sed 's/+//' | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
@@ -153,6 +156,32 @@ jobs:
           # if they fail to copy, it will try to build them on the tester and fail
           builder_images_to_copy: aztecprotocol/aztec:${{ env.GIT_COMMIT }} aztecprotocol/end-to-end:${{ env.GIT_COMMIT }}
           # command to produce the images in case they don't exist
+          builder_command: scripts/earthly-ci ./yarn-project+export-e2e-test-images
+          run: |
+            set -eux
+            cd ./yarn-project/end-to-end/
+            export FORCE_COLOR=1
+            ../../scripts/earthly-ci -P --no-output +${{ matrix.test }}
+
+  spartan-e2e:
+    needs: [build, changes]
+    if: ${{ needs.changes.outputs.non-barretenberg-cpp == 'true' }}
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson( needs.build.outputs.e2e_list )}}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ env.GIT_COMMIT }}" }
+      - uses: ./.github/ci-setup-action
+      - name: Setup and Test
+        timeout-minutes: 40
+        uses: ./.github/ensure-tester-with-images
+        with:
+          runner_type: ${{ contains(matrix.test, 'prover') && '64core-tester-x86' || '16core-tester-x86' }}
+          builder_type: builder-x86
+          builder_images_to_copy: aztecprotocol/aztec:${{ env.GIT_COMMIT }} aztecprotocol/end-to-end:${{ env.GIT_COMMIT }}
           builder_command: scripts/earthly-ci ./yarn-project+export-e2e-test-images
           run: |
             set -eux

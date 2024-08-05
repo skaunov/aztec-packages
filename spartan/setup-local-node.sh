@@ -7,11 +7,11 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-$(uname)-amd64
 chmod +x ./kind
 sudo mv ./kind /usr/local/bin/kind
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 kind create cluster
 
 
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
