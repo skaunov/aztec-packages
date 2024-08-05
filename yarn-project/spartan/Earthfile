@@ -21,7 +21,7 @@ spartan-test:
     FROM ../+end-to-end-base
 
     COPY ../+anvil/anvil /opt/foundry/bin/anvil
-    COPY ../+end-to-end-prod/usr/src /usr/src
+    COPY +spartan-test-prod/usr/src /usr/src
     WORKDIR /usr/src/yarn-project/spartan
     ENTRYPOINT ["yarn", "test"]
 

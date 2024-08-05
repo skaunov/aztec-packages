@@ -1,9 +1,9 @@
 images:
   test:
-    image: aztecprotocol/spartan-test:8d93a281899690cb3d906abe9e7d434f4222c43e
+    image: aztecprotocol/spartan-test:c07d910d0b8b83b62008e79a7085db6c5020df4e
     pullPolicy: IfNotPresent
   aztec:
-    image: aztecprotocol/aztec:8d93a281899690cb3d906abe9e7d434f4222c43e
+    image: aztecprotocol/aztec:c07d910d0b8b83b62008e79a7085db6c5020df4e
     pullPolicy: IfNotPresent
   curl:
     image: curlimages/curl:7.81.0
@@ -58,3 +58,6 @@ ethereum:
     successThreshold: 1
     failureThreshold: 3
   resources: {}
+
+test: 'sample'
+scenario: 'default'

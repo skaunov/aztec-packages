@@ -995,8 +995,11 @@ __metadata:
   resolution: "@aztec/spartan@workspace:spartan"
   dependencies:
     "@aztec/aztec.js": "workspace:^"
+    "@aztec/bb-prover": "workspace:^"
     "@aztec/cli": "workspace:^"
     "@aztec/foundation": "workspace:^"
+    "@aztec/noir-contracts.js": "workspace:^"
+    "@aztec/noir-protocol-circuits-types": "workspace:^"
     "@chainsafe/enr": ^3.0.0
     "@jest/globals": ^29.5.0
     "@libp2p/peer-id-factory": ^4.2.2
@@ -1004,6 +1007,7 @@ __metadata:
     "@swc/core": ^1.4.11
     "@swc/jest": ^0.2.36
     "@types/jest": ^29.5.0
+    "@types/node": ^18.7.23
     jest: ^29.5.0
     ts-node: ^10.9.1
     typescript: ^5.0.4

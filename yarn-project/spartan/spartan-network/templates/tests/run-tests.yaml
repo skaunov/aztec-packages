@@ -2,17 +2,17 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ .Release.Name }}-test"
+  labels:
+    {{- include "spartan-network.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
 spec:
+  restartPolicy: Never
   containers:
     - name: test
-      image: "{{ .Values.images.test }}"
-      command: ["/bin/sh", "-c"]
+      image: {{ .Values.images.test.image }}
       args:
-        - |
-          yarn test {{ .Values.test.name }}
-        
+        - {{ .Values.test }}
       env:
         - name: SCENARIO
           value: {{ .Values.scenario }}
