@@ -10,7 +10,7 @@ import { Instruction } from './instruction.js';
 
 export class Poseidon2 extends Instruction {
   static type: string = 'POSEIDON2';
-  static readonly opcode: Opcode = Opcode.POSEIDON2;
+  static readonly opcode: Opcode = Opcode.POSEIDON2PERM;
   static readonly stateSize = 4;
 
   // Informs (de)serialization. See Instruction.deserialize.

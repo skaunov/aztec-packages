@@ -54,82 +54,82 @@ const DefaultBaseGasCost: Gas = { l2Gas: 10, daGas: 0 };
 
 /** Base gas costs for each instruction. Additional gas cost may be added on top due to memory or storage accesses, etc. */
 const BaseGasCosts: Record<Opcode, Gas> = {
-  [Opcode.ADD]: DefaultBaseGasCost,
-  [Opcode.SUB]: DefaultBaseGasCost,
-  [Opcode.MUL]: DefaultBaseGasCost,
-  [Opcode.DIV]: DefaultBaseGasCost,
-  [Opcode.FDIV]: DefaultBaseGasCost,
-  [Opcode.EQ]: DefaultBaseGasCost,
-  [Opcode.LT]: DefaultBaseGasCost,
-  [Opcode.LTE]: DefaultBaseGasCost,
-  [Opcode.AND]: DefaultBaseGasCost,
-  [Opcode.OR]: DefaultBaseGasCost,
-  [Opcode.XOR]: DefaultBaseGasCost,
-  [Opcode.NOT]: DefaultBaseGasCost,
-  [Opcode.SHL]: DefaultBaseGasCost,
-  [Opcode.SHR]: DefaultBaseGasCost,
-  [Opcode.CAST]: DefaultBaseGasCost,
+  [Opcode.ADD]: { l2Gas: 320, daGas: 0 },
+  [Opcode.SUB]: { l2Gas: 320, daGas: 0 },
+  [Opcode.MUL]: { l2Gas: 330, daGas: 0 },
+  [Opcode.DIV]: { l2Gas: 430, daGas: 0 },
+  [Opcode.FDIV]: { l2Gas: 320, daGas: 0 },
+  [Opcode.EQ]: { l2Gas: 320, daGas: 0 },
+  [Opcode.LT]: { l2Gas: 640, daGas: 0 },
+  [Opcode.LTE]: { l2Gas: 640, daGas: 0 },
+  [Opcode.AND]: { l2Gas: 640, daGas: 0 },
+  [Opcode.OR]: { l2Gas: 640, daGas: 0 },
+  [Opcode.XOR]: { l2Gas: 640, daGas: 0 },
+  [Opcode.NOT]: { l2Gas: 410, daGas: 0 },
+  [Opcode.SHL]: { l2Gas: 640, daGas: 0 },
+  [Opcode.SHR]: { l2Gas: 640, daGas: 0 },
+  [Opcode.CAST]: { l2Gas: 300, daGas: 0 },
   // Execution environment
-  [Opcode.ADDRESS]: DefaultBaseGasCost,
-  [Opcode.STORAGEADDRESS]: DefaultBaseGasCost,
-  [Opcode.SENDER]: DefaultBaseGasCost,
-  [Opcode.FEEPERL2GAS]: DefaultBaseGasCost,
-  [Opcode.FEEPERDAGAS]: DefaultBaseGasCost,
-  [Opcode.TRANSACTIONFEE]: DefaultBaseGasCost,
-  [Opcode.FUNCTIONSELECTOR]: DefaultBaseGasCost,
-  [Opcode.CHAINID]: DefaultBaseGasCost,
-  [Opcode.VERSION]: DefaultBaseGasCost,
-  [Opcode.BLOCKNUMBER]: DefaultBaseGasCost,
-  [Opcode.TIMESTAMP]: DefaultBaseGasCost,
-  [Opcode.COINBASE]: DefaultBaseGasCost,
-  [Opcode.BLOCKL2GASLIMIT]: DefaultBaseGasCost,
-  [Opcode.BLOCKDAGASLIMIT]: DefaultBaseGasCost,
-  [Opcode.CALLDATACOPY]: DefaultBaseGasCost,
+  [Opcode.ADDRESS]: { l2Gas: 200, daGas: 0 },
+  [Opcode.STORAGEADDRESS]: { l2Gas: 200, daGas: 0 },
+  [Opcode.SENDER]: { l2Gas: 200, daGas: 0 },
+  [Opcode.FEEPERL2GAS]: { l2Gas: 200, daGas: 0 },
+  [Opcode.FEEPERDAGAS]: { l2Gas: 200, daGas: 0 },
+  [Opcode.TRANSACTIONFEE]: { l2Gas: 200, daGas: 0 },
+  [Opcode.FUNCTIONSELECTOR]: { l2Gas: 200, daGas: 0 },
+  [Opcode.CHAINID]: { l2Gas: 200, daGas: 0 },
+  [Opcode.VERSION]: { l2Gas: 200, daGas: 0 },
+  [Opcode.BLOCKNUMBER]: { l2Gas: 200, daGas: 0 },
+  [Opcode.TIMESTAMP]: { l2Gas: 200, daGas: 0 },
+  [Opcode.COINBASE]: { l2Gas: 200, daGas: 0 },
+  [Opcode.BLOCKL2GASLIMIT]: { l2Gas: 200, daGas: 0 },
+  [Opcode.BLOCKDAGASLIMIT]: { l2Gas: 200, daGas: 0 },
+  [Opcode.CALLDATACOPY]: { l2Gas: 200, daGas: 0 }, // Cost for ONE field
   // Gas
-  [Opcode.L2GASLEFT]: DefaultBaseGasCost,
-  [Opcode.DAGASLEFT]: DefaultBaseGasCost,
+  [Opcode.L2GASLEFT]: { l2Gas: 180, daGas: 0 },
+  [Opcode.DAGASLEFT]: { l2Gas: 180, daGas: 0 },
   // Control flow
-  [Opcode.JUMP]: DefaultBaseGasCost,
-  [Opcode.JUMPI]: DefaultBaseGasCost,
-  [Opcode.INTERNALCALL]: DefaultBaseGasCost,
-  [Opcode.INTERNALRETURN]: DefaultBaseGasCost,
+  [Opcode.JUMP]: { l2Gas: 120, daGas: 0 },
+  [Opcode.JUMPI]: { l2Gas: 180, daGas: 0 },
+  [Opcode.INTERNALCALL]: { l2Gas: 180, daGas: 0 },
+  [Opcode.INTERNALRETURN]: { l2Gas: 180, daGas: 0 },
   // Memory
-  [Opcode.SET]: DefaultBaseGasCost,
-  [Opcode.MOV]: DefaultBaseGasCost,
-  [Opcode.CMOV]: DefaultBaseGasCost,
+  [Opcode.SET]: { l2Gas: 180, daGas: 0 },
+  [Opcode.MOV]: { l2Gas: 230, daGas: 0 },
+  [Opcode.CMOV]: { l2Gas: 340, daGas: 0 },
   // World state
-  [Opcode.SLOAD]: DefaultBaseGasCost,
-  [Opcode.SSTORE]: DefaultBaseGasCost,
-  [Opcode.NOTEHASHEXISTS]: DefaultBaseGasCost,
-  [Opcode.EMITNOTEHASH]: DefaultBaseGasCost,
-  [Opcode.NULLIFIEREXISTS]: DefaultBaseGasCost,
-  [Opcode.EMITNULLIFIER]: DefaultBaseGasCost,
-  [Opcode.L1TOL2MSGEXISTS]: DefaultBaseGasCost,
-  [Opcode.HEADERMEMBER]: DefaultBaseGasCost,
-  [Opcode.EMITUNENCRYPTEDLOG]: DefaultBaseGasCost,
-  [Opcode.SENDL2TOL1MSG]: DefaultBaseGasCost,
-  [Opcode.GETCONTRACTINSTANCE]: DefaultBaseGasCost,
+  [Opcode.SLOAD]: { l2Gas: 200, daGas: 0 }, // Cost for ONE item
+  [Opcode.SSTORE]: { l2Gas: 200, daGas: 0 }, // Cost for ONE item
+  [Opcode.NOTEHASHEXISTS]: { l2Gas: 260, daGas: 0 },
+  [Opcode.EMITNOTEHASH]: { l2Gas: 260, daGas: 0 },
+  [Opcode.NULLIFIEREXISTS]: { l2Gas: 260, daGas: 0 },
+  [Opcode.EMITNULLIFIER]: { l2Gas: 260, daGas: 0 },
+  [Opcode.L1TOL2MSGEXISTS]: { l2Gas: 260, daGas: 0 },
+  [Opcode.HEADERMEMBER]: DefaultBaseGasCost, // TODO
+  [Opcode.GETCONTRACTINSTANCE]: { l2Gas: 480, daGas: 0 },
+  [Opcode.EMITUNENCRYPTEDLOG]: { l2Gas: 200, daGas: 0 }, // Cost for ONE field
+  [Opcode.SENDL2TOL1MSG]: { l2Gas: 260, daGas: 0 },
   // External calls
-  [Opcode.CALL]: DefaultBaseGasCost,
-  [Opcode.STATICCALL]: DefaultBaseGasCost,
+  [Opcode.CALL]: { l2Gas: 2000, daGas: 0 }, // Should be variable
+  [Opcode.STATICCALL]: { l2Gas: 2000, daGas: 0 }, // Should be variable
   [Opcode.DELEGATECALL]: DefaultBaseGasCost,
-  [Opcode.RETURN]: DefaultBaseGasCost,
-  [Opcode.REVERT]: DefaultBaseGasCost,
+  [Opcode.RETURN]: { l2Gas: 1000, daGas: 0 }, // Should be variable
+  [Opcode.REVERT]: { l2Gas: 1000, daGas: 0 }, // Should be variable
   // Misc
-  [Opcode.DEBUGLOG]: DefaultBaseGasCost,
+  [Opcode.DEBUGLOG]: { l2Gas: 50000, daGas: 0 }, // Expensive, to deter use in production
+  // Gadgets - temp
+  [Opcode.KECCAK]: { l2Gas: 50000, daGas: 0 }, // Should be removed
+  [Opcode.PEDERSENCOMMITMENT]: DefaultBaseGasCost, // Should be removed
+  [Opcode.SHA256]: { l2Gas: 50000, daGas: 0 }, // Should be removed
+  [Opcode.PEDERSEN]: { l2Gas: 50000, daGas: 0 }, // Should be removed
   // Gadgets
-  [Opcode.KECCAK]: DefaultBaseGasCost,
-  [Opcode.POSEIDON2]: DefaultBaseGasCost,
-  [Opcode.SHA256]: DefaultBaseGasCost,
-  [Opcode.PEDERSEN]: DefaultBaseGasCost,
-  [Opcode.ECADD]: DefaultBaseGasCost,
-  [Opcode.MSM]: DefaultBaseGasCost,
-  [Opcode.PEDERSENCOMMITMENT]: DefaultBaseGasCost,
+  [Opcode.POSEIDON2PERM]: { l2Gas: 670, daGas: 0 },
+  [Opcode.SHA256COMPRESSION]: { l2Gas: 2610, daGas: 0 },
+  [Opcode.KECCAKF1600]: { l2Gas: 3000, daGas: 0 },
+  [Opcode.ECADD]: { l2Gas: 600, daGas: 0 },
+  [Opcode.MSM]: { l2Gas: 600, daGas: 0 },
   // Conversions
-  [Opcode.TORADIXLE]: DefaultBaseGasCost,
-  // Other
-  [Opcode.SHA256COMPRESSION]: DefaultBaseGasCost,
-  [Opcode.KECCAKF1600]: DefaultBaseGasCost,
+  [Opcode.TORADIXLE]: { l2Gas: 170, daGas: 0 }, // Cost for ONE limb
 };
 
 /** Returns the fixed base gas cost for a given opcode. */

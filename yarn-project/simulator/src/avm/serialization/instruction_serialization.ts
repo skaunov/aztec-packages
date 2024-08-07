@@ -72,18 +72,18 @@ export enum Opcode {
   // Misc
   DEBUGLOG,
   // Gadgets
-  KECCAK,
-  POSEIDON2,
-  SHA256, // temp - may be removed, but alot of contracts rely on it
-  PEDERSEN, // temp - may be removed, but alot of contracts rely on it
+  KECCAK, // temp
+  POSEIDON2PERM,
+  SHA256, // temp
+  PEDERSEN, // temp
   ECADD,
   MSM,
-  PEDERSENCOMMITMENT,
+  PEDERSENCOMMITMENT, // temp
   // Conversion
   TORADIXLE,
-  // Future Gadgets -- pending changes in noir
+  // Gadgets
   SHA256COMPRESSION,
-  KECCAKF1600, // Here for when we eventually support this
+  KECCAKF1600,
 }
 
 // Possible types for an instruction's operand in its wire format. (Keep in sync with CPP code.
