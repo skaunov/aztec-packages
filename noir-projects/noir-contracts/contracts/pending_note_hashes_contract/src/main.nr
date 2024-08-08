@@ -39,11 +39,13 @@ contract PendingNoteHashes {
 
         let options = NoteGetterOptions::with_filter(filter_notes_min_sum, amount);
         // get note inserted above
-        let notes = owner_balance.pop_notes(options);
+        let notes = owner_balance.get_notes(options);
 
         let note0 = notes.get(0);
         assert(note.value == note0.value);
         assert(notes.len() == 1);
+
+        owner_balance.remove(note0);
 
         note0.value
     }
@@ -135,9 +137,12 @@ contract PendingNoteHashes {
 
         let mut options = NoteGetterOptions::new();
         options = options.set_limit(1);
-        let note = owner_balance.pop_notes(options).get(0);
+        let note = owner_balance.get_notes(options).get(0);
 
         assert(expected_value == note.value);
+
+        owner_balance.remove(note);
+
         expected_value
     }
 
@@ -373,9 +378,12 @@ contract PendingNoteHashes {
     #[contract_library_method]
     fn destroy_max_notes(owner: AztecAddress, storage: Storage<&mut PrivateContext>) {
         let owner_balance = storage.balances.at(owner);
-        // Note that we're relying on PXE actually returning the notes, we're not constraining that any specific
-        // numer of notes are deleted.
-        let _ = owner_balance.pop_notes(NoteGetterOptions::new());
+        let notes = owner_balance.get_notes(NoteGetterOptions::new());
+
+        for i in 0..max_notes_per_call() {
+            let note = notes.get(i);
+            owner_balance.remove(note);
+        }
     }
 
     #[contract_library_method]
