@@ -19,16 +19,16 @@ pub fn create_note<Note, N, M>(
     let note_hash = note.compute_note_hiding_point().x;
 
     let serialized_note = Note::serialize_content(*note);
-    assert(
-        notify_created_note(
-        storage_slot,
-        Note::get_note_type_id(),
-        serialized_note,
-        note_hash,
-        note_hash_counter
-    )
-        == 0
-    );
+    // assert(
+    //     notify_created_note(
+    //     storage_slot,
+    //     Note::get_note_type_id(),
+    //     serialized_note,
+    //     note_hash,
+    //     note_hash_counter
+    // )
+    //     == 0
+    // );
 
     context.push_note_hash(note_hash);
 

@@ -123,6 +123,11 @@ export class ClientExecutionContext extends ViewDataOracle {
     );
 
     const fields = [...privateContextInputs.toFields(), ...args];
+    console.log("privateContextInputs", JSON.stringify({
+      inputs: privateContextInputs
+    }));
+    console.log("args", args);
+    // console.log('fields', fields);
     return toACVMWitness(0, fields);
   }
 
@@ -520,6 +525,7 @@ export class ClientExecutionContext extends ViewDataOracle {
       this.scopes,
     );
 
+    console.log("NESTING");
     const childExecutionResult = await executePrivateFunction(
       context,
       targetArtifact,

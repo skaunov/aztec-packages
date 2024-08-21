@@ -132,3 +132,22 @@ pub fn encode_and_encrypt_note_with_keys_unconstrained<Note, let N: u32, let NB:
         emit_with_keys(context, e.note, ovpk, ivpk, recipient, compute_unconstrained);
     }
 }
+
+// =============================================================================================================
+
+// when context was second in the closure env it has not failed (Point, &mut PrivateContext)
+pub fn encode_and_encrypt_note_with_keys_2<Note, let N: u32, let NB: u32, let M: u32>(
+    context: &mut PrivateContext,
+    ovpk: Point
+) -> fn[(&mut PrivateContext, Point)](NoteEmission<Note>) -> () where Note: NoteInterface<N, NB>, [Field; N]: LensForEncryptedLog<N, M> {
+    | e: NoteEmission<Note> | {
+        // let ovpk = Point::empty();
+        let ovsk_app: Field  = context.request_ovsk_app(ovpk.hash());
+
+        let iterator_len = if N > M { M } else { N };
+        for i in 0..iterator_len {
+        }
+
+        context.push_nullifier(0);
+    }
+}
