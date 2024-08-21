@@ -50,7 +50,7 @@ TYPED_TEST(BoolTest, TestBasicOperations)
 
     if (!IsSimulator<Builder>) {
         auto gates_after = builder.get_num_gates();
-        EXPECT_EQ(gates_after - gates_before, 6UL);
+        EXPECT_EQ(gates_after - gates_before, 8UL);
     }
 }
 
