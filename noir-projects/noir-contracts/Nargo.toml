@@ -41,6 +41,7 @@ members = [
     "contracts/token_contract",
     "contracts/token_blacklist_contract",
     "contracts/token_bridge_contract",
+    "contracts/token_with_refunds_contract",
     "contracts/uniswap_contract",
     "contracts/multi_call_entrypoint_contract",
     "contracts/static_child_contract",

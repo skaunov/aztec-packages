@@ -2,7 +2,7 @@ mod types;
 
 fn main(
     funded_amount: Field,
-    inputs: dep::aztec::context::inputs::PrivateContextInputs,
+    inputs: dep::aztec::context::inputs::PrivateContextInputs
 ) -> pub Field {
     let mut context = dep::aztec::context::private_context::PrivateContext::new(inputs, 4);
 
