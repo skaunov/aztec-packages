@@ -159,6 +159,9 @@ contract RollupTest is DecoderBase {
     bytes32 archive = data.archive;
     bytes memory body = data.body;
 
+    // Progress time as necessary
+    vm.warp(max(block.timestamp, data.decodedHeader.globalVariables.timestamp));
+
     assembly {
       mstore(add(header, add(0x20, 0x0248)), feeAmount)
     }
@@ -303,6 +306,9 @@ contract RollupTest is DecoderBase {
 
   function testBlocksWithAssumeProven() public setUpFor("mixed_block_1") {
     rollup.setAssumeProvenUntilBlockNumber(2);
+    assertEq(rollup.pendingBlockCount(), 1, "Invalid pending block count");
+    assertEq(rollup.provenBlockCount(), 1, "Invalid proven block count");
+
     _testBlock("mixed_block_1", false);
     _testBlock("mixed_block_2", false);
 
@@ -311,6 +317,9 @@ contract RollupTest is DecoderBase {
   }
 
   function testSetAssumeProvenAfterBlocksProcessed() public setUpFor("mixed_block_1") {
+    assertEq(rollup.pendingBlockCount(), 1, "Invalid pending block count");
+    assertEq(rollup.provenBlockCount(), 1, "Invalid proven block count");
+
     _testBlock("mixed_block_1", false);
     _testBlock("mixed_block_2", false);
     rollup.setAssumeProvenUntilBlockNumber(2);
