@@ -440,8 +440,6 @@ export class Sequencer {
     return true;
   }
 
-  async assertCanStillProposeBlock(): Promise<void> {}
-
   @trackSpan(
     'Sequencer.buildBlockAndPublish',
     (_validTxs, newGlobalVariables, _historicalHeader, _chainTipArchive) => ({

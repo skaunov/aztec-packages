@@ -88,11 +88,8 @@ contract Rollup is Leonidas, IRollup, ITestRollup {
     VERSION = 1;
 
     // Genesis block
-    blocks[0] = BlockLog({
-      archive: bytes32(0x1200a06aae1368abe36530b585bd7a4d2ba4de5037b82076412691a187d7621e),
-      slotNumber: 0,
-      isProven: true
-    });
+    blocks[0] =
+      BlockLog({archive: bytes32(Constants.GENESIS_ARCHIVE_ROOT), slotNumber: 0, isProven: true});
     pendingBlockCount = 1;
     provenBlockCount = 1;
   }

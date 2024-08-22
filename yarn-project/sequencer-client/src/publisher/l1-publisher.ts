@@ -314,6 +314,8 @@ export class L1Publisher {
     //        Time jumps only allowed into the future.
     //
     //        If this is run on top of a real chain, the time lords will catch you.
+    //
+    // @todo  #8153
 
     if (!this.timeTraveler) {
       return;
