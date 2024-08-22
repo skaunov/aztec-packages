@@ -334,6 +334,8 @@ export class L1Publisher {
     //
     // @todo  #8153
 
+    return true;
+
     if (!this.timeTraveler) {
       return;
     }

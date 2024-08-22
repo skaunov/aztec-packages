@@ -32,6 +32,7 @@ import { type BBNativePrivateKernelProver } from '@aztec/bb-prover';
 import {
   CANONICAL_AUTH_REGISTRY_ADDRESS,
   CANONICAL_KEY_REGISTRY_ADDRESS,
+  ETHEREUM_SLOT_DURATION,
   type EthAddress,
   GasSettings,
   MAX_PACKED_PUBLIC_BYTECODE_SIZE_IN_FIELDS,
@@ -40,6 +41,7 @@ import {
 } from '@aztec/circuits.js';
 import { bufferAsFields } from '@aztec/foundation/abi';
 import { makeBackoff, retry, retryUntil } from '@aztec/foundation/retry';
+import { RunningPromise } from '@aztec/foundation/running-promise';
 import {
   AvailabilityOracleAbi,
   AvailabilityOracleBytecode,
@@ -72,15 +74,20 @@ import * as path from 'path';
 import {
   type Account,
   type Chain,
+  type GetContractReturnType,
   type HDAccount,
   type HttpTransport,
   type PrivateKeyAccount,
+  type PublicClient,
   createPublicClient,
   createWalletClient,
+  getAddress,
+  getContract,
   http,
 } from 'viem';
 import { mnemonicToAccount } from 'viem/accounts';
 import { foundry } from 'viem/chains';
+import type * as chains from 'viem/chains';
 
 import { MNEMONIC } from './fixtures.js';
 import { getACVMConfig } from './get_acvm_config.js';
@@ -107,6 +114,85 @@ export const getPrivateKeyFromIndex = (index: number): Buffer | null => {
   const privKeyRaw = hdAccount.getHdKey().privateKey;
   return privKeyRaw === null ? null : Buffer.from(privKeyRaw);
 };
+
+class Watcher {
+  private blockNumber: number;
+  private rollup: GetContractReturnType<typeof RollupAbi, PublicClient<HttpTransport, chains.Chain>>;
+
+  private filledRunningPromise?: RunningPromise;
+  private stalledRunningPromise?: RunningPromise;
+
+  private logger: DebugLogger = createDebugLogger(`aztec:utils:watcher`);
+
+  constructor(
+    private cheatcodes: EthCheatCodes,
+    rollupAddress: EthAddress,
+    publicClient: PublicClient<HttpTransport, chains.Chain>,
+  ) {
+    this.blockNumber = 0;
+
+    this.rollup = getContract({
+      address: getAddress(rollupAddress.toString()),
+      abi: RollupAbi,
+      client: publicClient,
+    });
+
+    this.logger.info(`Watcher created for rollup at ${rollupAddress}`);
+  }
+
+  start() {
+    if (this.filledRunningPromise) {
+      throw new Error('Watcher already watching for filled slot');
+    }
+    if (this.stalledRunningPromise) {
+      throw new Error('Watcher already watching for stalled block');
+    }
+
+    this.filledRunningPromise = new RunningPromise(() => this.mineIfSlotFilled(), 1000);
+    this.stalledRunningPromise = new RunningPromise(() => this.mineIfStalled(), ETHEREUM_SLOT_DURATION * 1000);
+
+    this.filledRunningPromise.start();
+    this.stalledRunningPromise.start();
+  }
+
+  async stop() {
+    await this.filledRunningPromise?.stop();
+    await this.stalledRunningPromise?.stop();
+  }
+
+  async sync() {
+    this.blockNumber = await this.cheatcodes.blockNumber();
+  }
+
+  async mineIfSlotFilled() {
+    const currentSlot = await this.rollup.read.getCurrentSlot();
+    const pendingBlockNumber = BigInt(await this.rollup.read.pendingBlockCount()) - 1n;
+    const [, lastSlotNumber] = await this.rollup.read.blocks([pendingBlockNumber]);
+
+    if (currentSlot === lastSlotNumber) {
+      // We should jump to the next slot
+      const timestamp = await this.rollup.read.getTimestampForSlot([currentSlot + 1n]);
+      try {
+        await this.cheatcodes.warp(Number(timestamp));
+      } catch (e) {
+        this.logger.error(`Failed to warp to timestamp ${timestamp}: ${e}`);
+      }
+      await this.sync();
+
+      this.logger.info(`Slot ${currentSlot} was filled, jumped to next slot`);
+    }
+  }
+
+  async mineIfStalled() {
+    const currentBlock = await this.cheatcodes.blockNumber();
+    if (currentBlock === this.blockNumber) {
+      await this.cheatcodes.mine();
+      await this.sync();
+
+      this.logger.info(`Blocks had stalled, progressed to next block`);
+    }
+  }
+}
 
 export const setupL1Contracts = async (
   l1RpcUrl: string,
@@ -377,6 +463,13 @@ export async function setup(
       initialValidators: opts.initialValidators,
     }));
 
+  const watcher = new Watcher(
+    new EthCheatCodes(config.l1RpcUrl),
+    deployL1ContractsValues.l1ContractAddresses.rollupAddress,
+    deployL1ContractsValues.publicClient,
+  );
+  watcher.start();
+
   config.publisherPrivateKey = `0x${publisherPrivKey!.toString('hex')}`;
   config.l1Contracts = deployL1ContractsValues.l1ContractAddresses;
 
@@ -446,6 +539,8 @@ export async function setup(
     }
 
     await anvil?.stop();
+
+    await watcher.stop();
   };
 
   return {
