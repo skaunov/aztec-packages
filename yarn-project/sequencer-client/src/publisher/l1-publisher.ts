@@ -180,7 +180,14 @@ export class L1Publisher {
     }
 
     const currentSlot = BigInt(await this.rollupContract.read.getCurrentSlot());
-    return currentSlot != slot;
+
+    if (currentSlot === slot) {
+      return false;
+    }
+
+    this.log.verbose(`Simulation will fail for slot ${slot} as it is not the current slot ${currentSlot}`);
+
+    return true;
   }
 
   // @note Assumes that all ethereum slots have blocks
@@ -239,9 +246,19 @@ export class L1Publisher {
     };
 
     if (await this.willSimulationFail(block.header.globalVariables.slotNumber.toBigInt())) {
-      // @note  See comment in willSimulationFail for more information
-      this.log.info(`Simulation will fail for slot ${block.header.globalVariables.slotNumber.toBigInt()}`);
-      return false;
+      // If we entered this case, it should be because the simulation is deemed to fail since the `timestamp` of anvil
+      // simulation is that of the LAST block, and not the block of the next, but we throughout the rest of the logic, have estimated
+      // that we will be the sequencer in the NEXT block.
+      //
+      // We will be cheating again here, if possible, we are going to perform a time jump.
+      // This should not be the case, but should be addressed along with #8110
+      await this.commitTimeJump(block.header.globalVariables.slotNumber.toBigInt());
+
+      // If we are still in the same slot, we will just wait for the next block to be mined.
+      // If in auto-mine, this might never happen.
+      if (await this.willSimulationFail(block.header.globalVariables.slotNumber.toBigInt())) {
+        return false;
+      }
     }
 
     const processTxArgs = {

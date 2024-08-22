@@ -291,13 +291,6 @@ export class Sequencer {
 
     const [submitter, slot, pendingBlockNumber, archive] = await this.publisher.getMetadataForSlotAtNextEthBlock();
 
-    if (await this.publisher.willSimulationFail(slot)) {
-      // @note  See comment in willSimulationFail for more information
-      const msg = `Simulation will fail for slot ${slot}`;
-      this.log.debug(msg);
-      throw new Error(msg);
-    }
-
     // If our tip of the chain is different from the tip on L1, we should not propose a block
     // @note  This will change along with the data publication changes.
     if (tipArchive && !archive.equals(tipArchive)) {
