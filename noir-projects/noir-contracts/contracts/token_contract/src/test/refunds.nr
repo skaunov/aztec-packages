@@ -1,4 +1,4 @@
-use crate::{test::utils, Token, types::token_note::TokenNote};
+use crate::{test::utils, Token};
 
 use dep::aztec::{
     test::helpers::cheatcodes, oracle::unsafe_rand::unsafe_rand, hash::compute_secret_hash,
@@ -6,6 +6,7 @@ use dep::aztec::{
     keys::getters::get_current_public_keys
 };
 use dep::authwit::cheatcodes as authwit_cheatcodes;
+use dep::int_note::int_note::IntNote;
 
 #[test]
 unconstrained fn setup_refund_success() {
@@ -45,7 +46,7 @@ unconstrained fn setup_refund_success() {
     // worth  `funded_amount - transaction_fee`. We "know" the transaction fee was 1 (it is hardcoded in
     // `executePublicFunction` TXE oracle) but we need to notify TXE of the note (preimage).
     env.store_note_in_cache(
-        &mut TokenNote {
+        &mut IntNote {
         amount: U128::from_integer(funded_amount - 1),
         npk_m_hash: user_npk_m_hash,
         randomness: user_randomness,
@@ -55,7 +56,7 @@ unconstrained fn setup_refund_success() {
         token_contract_address
     );
     env.store_note_in_cache(
-        &mut TokenNote {
+        &mut IntNote {
         amount: U128::from_integer(1),
         npk_m_hash: fee_payer_npk_m_hash,
         randomness: fee_payer_randomness,

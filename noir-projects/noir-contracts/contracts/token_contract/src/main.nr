@@ -13,6 +13,7 @@ mod test;
 contract Token {
     // Libs
 
+    use dep::int_note::int_note::{IntNote, IntNoteHidingPoint};
     use dep::compressed_string::FieldCompressedString;
 
     use dep::aztec::{
@@ -32,10 +33,7 @@ contract Token {
     use dep::authwit::auth::{assert_current_call_valid_authwit, assert_current_call_valid_authwit_public, compute_authwit_nullifier};
     // docs:end:import_authwit
 
-    use crate::types::{
-        transparent_note::TransparentNote,
-        token_note::{TokenNote, TOKEN_NOTE_LEN, TokenNoteHidingPoint}, balance_set::BalanceSet
-    };
+    use crate::types::{transparent_note::TransparentNote, balance_set::BalanceSet};
     // docs:end::imports
 
     // In the first transfer iteration we are computing a lot of additional information (validating inputs, retrieving
@@ -64,7 +62,7 @@ contract Token {
         minters: Map<AztecAddress, PublicMutable<bool>>,
         // docs:end:storage_minters
         // docs:start:storage_balances
-        balances: Map<AztecAddress, BalanceSet<TokenNote>>,
+        balances: Map<AztecAddress, BalanceSet<IntNote>>,
         // docs:end:storage_balances
         total_supply: PublicMutable<U128>,
         // docs:start:storage_pending_shields
@@ -536,7 +534,7 @@ contract Token {
 
         // 4. We create the partial notes for the fee payer and the user.
         // --> Called "partial" because they don't have the amount set yet (that will be done in `complete_refund(...)`).
-        let fee_payer_partial_note = TokenNote {
+        let fee_payer_partial_note = IntNote {
             header: NoteHeader {
                 contract_address: AztecAddress::zero(),
                 nonce: 0,
@@ -547,7 +545,7 @@ contract Token {
             npk_m_hash: fee_payer_npk_m_hash,
             randomness: fee_payer_randomness
         };
-        let user_partial_note = TokenNote {
+        let user_partial_note = IntNote {
             header: NoteHeader {
                 contract_address: AztecAddress::zero(),
                 nonce: 0,
@@ -580,10 +578,10 @@ contract Token {
     #[aztec(internal)]
     fn complete_refund(
         // TODO(#7771): the following makes macros crash --> try getting it work once we migrate to metaprogramming
-        // mut fee_payer_point: TokenNoteHidingPoint,
-        // mut user_point: TokenNoteHidingPoint,
-        fee_payer_point_immutable: TokenNoteHidingPoint,
-        user_point_immutable: TokenNoteHidingPoint,
+        // mut fee_payer_point: IntNoteHidingPoint,
+        // mut user_point: IntNoteHidingPoint,
+        fee_payer_point_immutable: IntNoteHidingPoint,
+        user_point_immutable: IntNoteHidingPoint,
         funded_amount: Field
     ) {
         // TODO(#7771): nuke the following 2 lines once we have mutable args
