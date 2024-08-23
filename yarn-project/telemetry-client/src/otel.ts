@@ -59,7 +59,7 @@ export class OpenTelemetryClient implements TelemetryClient {
     // https://opentelemetry.io/docs/specs/otel/compatibility/prometheus_and_openmetrics/#resource-attributes
     // https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#supporting-target-metadata-in-both-push-based-and-pull-based-systems
     this.targetInfo = this.meterProvider.getMeter('target').createGauge('target_info', {
-      description: 'Target information',
+      description: 'Target metadata',
     });
 
     if (this.resource.asyncAttributesPending) {
@@ -71,6 +71,10 @@ export class OpenTelemetryClient implements TelemetryClient {
     }
 
     this.hostMetrics.start();
+  }
+
+  public isEnabled() {
+    return true;
   }
 
   public async stop() {
