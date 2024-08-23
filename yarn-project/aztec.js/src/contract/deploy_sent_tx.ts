@@ -1,6 +1,5 @@
 import { type PXE, type TxHash, type TxReceipt } from '@aztec/circuit-types';
 import { type AztecAddress } from '@aztec/circuits.js';
-import { createDebugLogger } from '@aztec/foundation/log';
 import { type FieldsOf } from '@aztec/foundation/types';
 import { type ContractInstanceWithAddress } from '@aztec/types/contracts';
 
@@ -25,8 +24,6 @@ export type DeployTxReceipt<TContract extends ContractBase = Contract> = FieldsO
  * A contract deployment transaction sent to the network, extending SentTx with methods to create a contract instance.
  */
 export class DeploySentTx<TContract extends Contract = Contract> extends SentTx {
-  private log = createDebugLogger('aztec:js:deploy_sent_tx');
-
   constructor(
     wallet: PXE | Wallet,
     txHashPromise: Promise<TxHash>,
@@ -55,7 +52,9 @@ export class DeploySentTx<TContract extends Contract = Contract> extends SentTx 
    */
   public override async wait(opts?: DeployedWaitOpts): Promise<DeployTxReceipt<TContract>> {
     const receipt = await super.wait(opts);
+    this.log.debug(`Returned from wait for ${await this.getTxHash()}: final status ${receipt.status}`);
     const contract = await this.getContractObject(opts?.wallet);
+    this.log.debug(`Contract instance created for ${this.instance.address.toString()}`);
     return { ...receipt, contract };
   }
 

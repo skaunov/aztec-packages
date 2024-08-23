@@ -57,3 +57,9 @@ http://{{ include "aztec-network.fullname" . }}-ethereum.{{ .Release.Namespace }
 {{- define "aztec-network.pxeUrl" -}}
 http://{{ include "aztec-network.fullname" . }}-pxe.{{ .Release.Namespace }}:{{ .Values.pxe.service.port }}
 {{- end -}}
+
+{{- define "aztec-network.bootNodeUrl" -}}
+http://{{ include "aztec-network.fullname" . }}-boot-node-0.{{ include "aztec-network.fullname" . }}-boot-node.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.bootNode.service.nodePort }}
+{{- end -}}
+
+
