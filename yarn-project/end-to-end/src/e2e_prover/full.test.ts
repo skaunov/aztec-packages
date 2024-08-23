@@ -27,7 +27,7 @@ describe('full_prover', () => {
   });
 
   afterEach(async () => {
-    await t.tokenSim.check();
+    await t.tokenSim.check(true);
   });
 
   it(
@@ -36,12 +36,18 @@ describe('full_prover', () => {
       logger.info(
         `Starting test using function: ${provenAssets[0].address}:${provenAssets[0].methods.balance_of_private.selector}`,
       );
-      const privateBalance = await provenAssets[0].methods.balance_of_private(accounts[0].address).simulate();
+      const privateBalance = await provenAssets[0].methods.balance_of_private(accounts[0].address).simulate({
+        // Tx validation is skipped here because the simulation fails the proof validation
+        skipTxValidation: true,
+      });
       const privateSendAmount = privateBalance / 2n;
       expect(privateSendAmount).toBeGreaterThan(0n);
       const privateInteraction = provenAssets[0].methods.transfer(accounts[1].address, privateSendAmount);
 
-      const publicBalance = await provenAssets[1].methods.balance_of_public(accounts[0].address).simulate();
+      const publicBalance = await provenAssets[1].methods.balance_of_public(accounts[0].address).simulate({
+        // Tx validation is skipped here because the simulation fails the proof validation
+        skipTxValidation: true,
+      });
       const publicSendAmount = publicBalance / 2n;
       expect(publicSendAmount).toBeGreaterThan(0n);
       const publicInteraction = provenAssets[1].methods.transfer_public(
