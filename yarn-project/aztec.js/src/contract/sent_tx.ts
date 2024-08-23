@@ -6,7 +6,6 @@ import {
   type TxReceipt,
   TxStatus,
 } from '@aztec/circuit-types';
-import { createDebugLogger } from '@aztec/foundation/log';
 import { retryUntil } from '@aztec/foundation/retry';
 import { type FieldsOf } from '@aztec/foundation/types';
 
@@ -44,7 +43,6 @@ export const DefaultWaitOpts: WaitOpts = {
  * its hash, receipt, and mining status.
  */
 export class SentTx {
-  protected log = createDebugLogger('aztec:js:sent_tx');
   constructor(protected pxe: PXE, protected txHashPromise: Promise<TxHash>) {}
 
   /**
@@ -86,7 +84,6 @@ export class SentTx {
       );
     }
     if (opts?.proven && receipt.blockNumber !== undefined) {
-      this.log.info(`Waiting for tx ${await this.getTxHash()} to be proven`);
       await this.waitForProven(receipt.blockNumber, opts);
     }
     if (opts?.debug) {
@@ -131,7 +128,6 @@ export class SentTx {
     return await retryUntil(
       async () => {
         const txReceipt = await this.pxe.getTxReceipt(txHash);
-        this.log.debug(`Got receipt for tx ${txHash}: ${txReceipt.status}`);
         // If receipt is not yet available, try again
         if (txReceipt.status === TxStatus.PENDING) {
           return undefined;
@@ -145,15 +141,10 @@ export class SentTx {
         if (!waitForNotesSync) {
           return txReceipt;
         }
-        this.log.debug(`Waiting for notes to sync for tx ${txHash}`);
         // Check if all sync blocks on the PXE Service are greater or equal than the block in which the tx was mined
         const { blocks, notes } = await this.pxe.getSyncStatus();
-
-        this.log.debug(`Got sync status for tx ${txHash}: ${blocks} ${JSON.stringify(notes)}`);
         const targetBlock = txReceipt.blockNumber!;
-        this.log.debug(`Target block for tx ${txHash}: ${targetBlock}`);
         const areNotesSynced = blocks >= targetBlock && Object.values(notes).every(block => block >= targetBlock);
-        this.log.debug(`Are notes synced for tx ${txHash}: ${areNotesSynced}`);
         return areNotesSynced ? txReceipt : undefined;
       },
       'isMined',
