@@ -76,7 +76,7 @@ import { MetadataTxValidator } from './tx_validator/tx_metadata_validator.js';
 import { TxProofValidator } from './tx_validator/tx_proof_validator.js';
 
 /**
- * The aztec node.
+ * The aztec node!
  */
 export class AztecNodeService implements AztecNode {
   private packageVersion: string;
