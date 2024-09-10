@@ -54,3 +54,13 @@ impl AddressNote {
     }
     // docs:end:address_note_def
 }
+
+impl Eq for AddressNote {
+    fn eq(self, other: Self) -> bool {
+        (self.value == other.value)
+        /* I feel like we want be able to compare addresses themselves here as far as user can look inside the notes, 
+        so that a set won't have duplicates and consequent unexpected behaviour */
+        // (self.npk_m_hash == other.npk_m_hash) &
+        // (self.randomness == other.randomness)
+    }
+}
